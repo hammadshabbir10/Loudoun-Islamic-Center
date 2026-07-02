@@ -1,0 +1,28 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# Cloudflare / Wrangler
+.wrangler/
+worker-configuration.d.ts
+
+# secrets — local dev only, never commit (keep the .example)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+
+# logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

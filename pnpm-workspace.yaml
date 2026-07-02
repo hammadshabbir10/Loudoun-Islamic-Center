@@ -1,0 +1,10 @@
+# Approve native build scripts required by the toolchain:
+#   esbuild  — Astro/Vite bundling
+#   sharp    — build-time image optimization (astro:assets)
+#   workerd  — local Cloudflare Worker runtime (platformProxy / wrangler dev)
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.23.0

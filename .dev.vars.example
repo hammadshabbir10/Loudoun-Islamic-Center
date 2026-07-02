@@ -1,0 +1,22 @@
+# ---------------------------------------------------------------------------
+# Local development secrets for the Cloudflare Worker runtime.
+#
+# Copy this file to `.dev.vars` (which is gitignored) and fill in real values.
+# NEVER commit `.dev.vars`. In production these live in Cloudflare Worker
+# Secrets (`wrangler secret put <NAME>`), not here and not in wrangler.jsonc.
+# ---------------------------------------------------------------------------
+
+# Cloudflare Turnstile secret key (spam protection on the forms pipeline).
+# The value below is Cloudflare's public "always passes" TEST secret, which
+# pairs with the test site key in src/config.ts so the demo form works locally
+# out of the box. Replace both with your real keys before launch.
+TURNSTILE_SECRET="1x0000000000000000000000000000000AA"
+
+# Plunk transactional email API key — https://useplunk.com (Project settings > API keys).
+# Required for the admin-notification email step. Leave empty and the pipeline
+# still verifies Turnstile and backs the lead up to R2 (email step is skipped).
+PLUNK_API_KEY=""
+
+# OPTIONAL: Z360 CRM token. When set AND `z360Enabled` is true in src/config.ts,
+# each lead is also POSTed to Z360 (after the R2 backup). Leave empty to disable.
+Z360_TOKEN=""

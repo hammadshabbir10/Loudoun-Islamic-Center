@@ -1,0 +1,80 @@
+---
+/**
+ * The base HTML shell for every page: <head> (SEO + LocalBusiness schema +
+ * GA4 via Partytown), header, main slot, footer. Blog posts use BlogPost.astro,
+ * which itself wraps this layout.
+ */
+import "@/styles/globals.css";
+import Seo from "@/components/Seo.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { Schema } from "astro-seo-schema";
+import type { WithContext, LocalBusiness } from "schema-dts";
+import { SITE } from "@/config";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+  noindex?: boolean;
+  type?: "website" | "article";
+}
+
+const props = Astro.props;
+const gaId = SITE.gaMeasurementId;
+
+// Sitewide LocalBusiness structured data (astro-seo-schema).
+const businessSchema: WithContext<LocalBusiness> = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": new URL("#business", SITE.url).href,
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+};
+if (SITE.telephone) businessSchema.telephone = SITE.telephone;
+if (SITE.address) {
+  businessSchema.address = { "@type": "PostalAddress", ...SITE.address };
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <Seo {...props} />
+    <Schema item={businessSchema} />
+
+    {
+      gaId && (
+        <>
+          <script
+            type="text/partytown"
+            is:inline
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          />
+          <script
+            type="text/partytown"
+            is:inline
+            set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+          />
+        </>
+      )
+    }
+  </head>
+  <body
+    class="bg-background text-foreground flex min-h-dvh flex-col antialiased"
+  >
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
