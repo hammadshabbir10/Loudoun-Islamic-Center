@@ -20,7 +20,10 @@ describe("leadSchema", () => {
   });
 
   it("rejects a bad email", () => {
-    const result = leadSchema.safeParse({ ...validLead, email: "not-an-email" });
+    const result = leadSchema.safeParse({
+      ...validLead,
+      email: "not-an-email",
+    });
     expect(result.success).toBe(false);
   });
 
@@ -39,6 +42,26 @@ describe("buildPlunkPayload", () => {
     expect(payload.to).toBe("admin@example.com");
     expect(payload.subject).toContain(validLead.name);
     expect(payload.subscribed).toBe(false);
+  });
+
+  it("escapes user-controlled HTML in the email body", () => {
+    const payload = buildPlunkPayload(
+      {
+        ...validLead,
+        name: "<script>alert(1)</script>",
+        message: "Hello <strong>team</strong> & thanks",
+      },
+      {
+        adminEmail: "admin@example.com",
+        siteName: "Zikra <Test>",
+      },
+    );
+    expect(payload.body).toContain("Zikra &lt;Test&gt;");
+    expect(payload.body).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(payload.body).toContain(
+      "Hello &lt;strong&gt;team&lt;/strong&gt; &amp; thanks",
+    );
+    expect(payload.body).not.toContain("<script>");
   });
 });
 

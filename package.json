@@ -10,8 +10,8 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro build && wrangler dev",
+    "build": "astro build && node scripts/write-assetsignore.mjs",
+    "preview": "pnpm build && wrangler dev",
     "sync": "astro sync",
     "check": "astro check",
     "typecheck": "astro sync && tsc --noEmit",
@@ -21,7 +21,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types ./worker-configuration.d.ts --env-interface CloudflareEnv --include-runtime false",
+    "cf-typegen:check": "wrangler types ./worker-configuration.d.ts --env-interface CloudflareEnv --include-runtime false --check"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",

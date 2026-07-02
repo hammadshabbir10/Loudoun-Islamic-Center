@@ -11,6 +11,8 @@ export default tseslint.config(
       ".astro/",
       "node_modules/",
       ".wrangler/",
+      ".agents/skills/",
+      ".claude/skills/",
       "worker-configuration.d.ts",
     ],
   },

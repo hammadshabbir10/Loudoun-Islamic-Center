@@ -9,6 +9,15 @@ export interface PlunkPayload {
   subscribed: boolean;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Build the Plunk transactional-email payload for a new lead notification.
  * Pure — no fetch — so it can be unit-tested.
@@ -17,15 +26,21 @@ export function buildPlunkPayload(
   lead: LeadInput,
   opts: { adminEmail: string; siteName: string },
 ): PlunkPayload {
+  const siteName = escapeHtml(opts.siteName);
+  const name = escapeHtml(lead.name);
+  const email = escapeHtml(lead.email);
+  const phone = lead.phone ? escapeHtml(lead.phone) : "—";
+  const message = escapeHtml(lead.message);
+
   return {
     to: opts.adminEmail,
     subject: `New lead from ${opts.siteName}: ${lead.name}`,
-    body: `<h2>New lead from ${opts.siteName}</h2>
-<p><strong>Name:</strong> ${lead.name}</p>
-<p><strong>Email:</strong> ${lead.email}</p>
-<p><strong>Phone:</strong> ${lead.phone ?? "—"}</p>
+    body: `<h2>New lead from ${siteName}</h2>
+<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Phone:</strong> ${phone}</p>
 <p><strong>Message:</strong></p>
-<p>${lead.message}</p>`,
+<p>${message}</p>`,
     subscribed: false,
   };
 }

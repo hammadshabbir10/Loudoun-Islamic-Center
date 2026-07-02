@@ -32,18 +32,18 @@ This is the **one intentional deviation** from "always use latest".
 
 Do not change, upgrade, or add dependencies — the lockfile is authoritative.
 
-| Area          | Choice                                                                    |
-| ------------- | ------------------------------------------------------------------------- |
-| Framework     | **Astro 5.18** (pinned), TypeScript **strict**, **pnpm**                  |
-| Hosting       | Cloudflare **Workers** via `@astrojs/cloudflare` (`output: "static"`)     |
-| Styling       | **Tailwind v4** (`@tailwindcss/vite`)                                     |
-| UI islands    | `@astrojs/react` + **shadcn/ui** (new-york style), **lucide-react** icons |
-| Content       | `@astrojs/mdx`, `@astrojs/rss`, `@astrojs/sitemap`, `astro:assets`        |
-| SEO           | `astro-seo`, `astro-seo-schema`, `astro-robots-txt`                       |
-| Analytics     | GA4 via `@astrojs/partytown` (off the main thread)                        |
-| State         | **Nanostores** (+ `@nanostores/react`) cross-island; React `useState` in-island |
-| Forms         | `react-hook-form` + `@hookform/resolvers/zod`, **zod** validation, **sonner** toasts |
-| Testing       | **Vitest** (unit); ESLint + Prettier (+ `prettier-plugin-astro`)          |
+| Area       | Choice                                                                               |
+| ---------- | ------------------------------------------------------------------------------------ |
+| Framework  | **Astro 5.18** (pinned), TypeScript **strict**, **pnpm**                             |
+| Hosting    | Cloudflare **Workers** via `@astrojs/cloudflare` (`output: "static"`)                |
+| Styling    | **Tailwind v4** (`@tailwindcss/vite`)                                                |
+| UI islands | `@astrojs/react` + **shadcn/ui** (new-york style), **lucide-react** icons            |
+| Content    | `@astrojs/mdx`, `@astrojs/rss`, `@astrojs/sitemap`, `astro:assets`                   |
+| SEO        | `astro-seo`, `astro-seo-schema`, `astro-robots-txt`                                  |
+| Analytics  | GA4 via `@astrojs/partytown` (off the main thread)                                   |
+| State      | **Nanostores** (+ `@nanostores/react`) cross-island; React `useState` in-island      |
+| Forms      | `react-hook-form` + `@hookform/resolvers/zod`, **zod** validation, **sonner** toasts |
+| Testing    | **Vitest** (unit); ESLint + Prettier (+ `prettier-plugin-astro`)                     |
 
 **Not in the stack** (do not introduce): Redux, Cloudflare KV, Workers AI, Playwright / e2e.
 QA is a human role. Redirects are handled by **Cloudflare Bulk Redirects**, not app code.
@@ -57,7 +57,11 @@ AGENTS.md                     ← this file (single source of truth)
 CLAUDE.md                     ← one line: @AGENTS.md
 README.md                     ← human onboarding + new-site setup
 CONTRIBUTING.md               ← how to build on the template
-.mcp.json                     ← MCP servers (astro-docs, shadcn)
+.mcp.json                     ← shared MCP servers for Claude Code-compatible tools
+.codex/config.toml            ← Codex MCP bridge to Astro Docs via npx mcp-remote
+skills-lock.json              ← external skill provenance + hashes
+.agents/
+  skills/                     ← Codex/project agent skills mirror
 .claude/
   settings.json               ← Claude Code permission allowlist
   skills/
@@ -71,13 +75,15 @@ CONTRIBUTING.md               ← how to build on the template
 .vscode/extensions.json       ← recommended editor extensions
 astro.config.mjs              ← locked (do not edit per-site)
 wrangler.jsonc                ← Worker config; R2 bucket + assets binding
+worker-configuration.d.ts     ← generated Wrangler binding/secret types
 .dev.vars.example             ← template for local secrets (copy → .dev.vars)
 package.json  eslint.config.js  .prettierrc.json  vitest.config.ts
 components.json               ← shadcn config (new-york, neutral, @/ aliases)
 tsconfig.json                 ← strict; "@/*" → "./src/*"
+scripts/write-assetsignore.mjs ← writes dist/.assetsignore so Worker code is not uploaded as an asset
 src/
   config.ts                   ← per-site config (SITE, TURNSTILE_SITE_KEY)
-  env.d.ts                    ← Worker runtime env: interface Env + App.Locals
+  env.d.ts                    ← Astro App.Locals bridge for generated Worker Env
   styles/globals.css          ← Tailwind v4 entry + design tokens
   lib/
     utils.ts                  ← cn() class-merge helper
@@ -108,6 +114,28 @@ tests/lead.test.ts            ← Vitest unit test for the lead schema/pipeline
 
 ## 4. Conventions
 
+### MCP docs access
+
+The Astro Docs MCP server is intentionally configured in **two committed project files**:
+
+- `.mcp.json` exposes the remote HTTP server (`astro-docs`) for Claude Code and tools that read
+  the common MCP JSON shape.
+- `.codex/config.toml` exposes the same server to Codex through `npx -y mcp-remote`, matching
+  Astro's Codex CLI guidance.
+
+Do not add `mcp-remote` to `package.json` and do not change the locked dependency stack for MCP.
+The docs server is remote; the Codex bridge is fetched automatically by `npx` when an agent needs
+it.
+
+### Project skills
+
+Project skills are mirrored in both `.agents/skills/` and `.claude/skills/` so Codex-style
+agents and Claude Code see the same operating playbooks. Keep the two trees equivalent when
+editing local `zikra-*` skills.
+
+External skills are tracked in `skills-lock.json` with source repo, skill path, and content hash.
+Use `npx skills list --json` to verify project skill discovery after installs or updates.
+
 ### Path alias
 
 `@/…` resolves to `src/…` in `.astro`, `.ts`, and `.tsx` files. Configured in
@@ -131,9 +159,8 @@ belong here — they ship to the browser.
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
-<BaseLayout title="…" description="…">
-  …page content…
-</BaseLayout>
+
+<BaseLayout title="…" description="…"> …page content… </BaseLayout>
 ```
 
 `BaseLayout` props: `{ title?, description?, canonical?, image?, noindex?, type? }` where
@@ -183,7 +210,9 @@ and Astro's a11y rules run in ESLint.
 ## 5. Forms pipeline (the important part)
 
 One flow, one Action. **shadcn form island (`ContactForm.tsx`) → the single Astro Action in
-`src/actions/index.ts`.** The Action, in order:
+`src/actions/index.ts`.** The React island calls the Action as JSON through `astro:actions`;
+if a future no-JS form is added, deliberately change that Action path to `accept: "form"` and
+update the skills/docs together. The Action, in order:
 
 1. **Verifies Turnstile** (`src/lib/turnstile.ts`) against `TURNSTILE_SECRET`.
 2. **Backs up the lead to R2** as `leads/<id>.json` (`src/lib/r2.ts`, binding `LEADS_BUCKET`).
@@ -198,8 +227,11 @@ on both the client (react-hook-form resolver) and the server (the Action).
 
 ### Secrets rule (critical, non-negotiable)
 
-- `TURNSTILE_SECRET`, `PLUNK_API_KEY`, and `Z360_TOKEN` live **only** in Cloudflare Worker
-  Secrets (`wrangler secret put <NAME>`), read at runtime from
+- `TURNSTILE_SECRET` and `PLUNK_API_KEY` are declared as required Worker Secrets in
+  `wrangler.jsonc`, validated by Wrangler on deploy, and included in
+  `worker-configuration.d.ts`. `Z360_TOKEN` is optional and only required on sites that enable
+  the CRM push.
+- These secrets live **only** in Cloudflare Worker Secrets (`wrangler secret put <NAME>`), read at runtime from
   **`context.locals.runtime.env`** (typed via the global `Env` interface / `App.Locals`).
 - **Never** read secrets from `import.meta.env` or `process.env`, and **never** hardcode them.
 - **Never commit secrets.** Local dev uses a **gitignored `.dev.vars`** (copy from
@@ -243,23 +275,24 @@ Run the **`zikra-seo-audit`** skill before launch.
 
 All via pnpm.
 
-| Command             | What it does                                             |
-| ------------------- | -------------------------------------------------------- |
-| `pnpm dev`          | `astro dev` — local dev server                           |
-| `pnpm build`        | `astro build` — production build                         |
-| `pnpm preview`      | `astro build && wrangler dev` — run the built Worker locally |
-| `pnpm sync`         | `astro sync` — regenerate content/types                  |
-| `pnpm check`        | `astro check` — Astro + template type diagnostics        |
-| `pnpm typecheck`    | `astro sync && tsc --noEmit`                             |
-| `pnpm lint`         | `eslint .`                                                |
-| `pnpm lint:fix`     | `eslint . --fix`                                          |
-| `pnpm format`       | `prettier --write .`                                     |
-| `pnpm format:check` | `prettier --check .`                                     |
-| `pnpm test`         | `vitest run`                                             |
-| `pnpm test:watch`   | `vitest`                                                 |
-| `pnpm cf-typegen`   | `wrangler types` — regenerate Worker binding types       |
+| Command                 | What it does                                                     |
+| ----------------------- | ---------------------------------------------------------------- |
+| `pnpm dev`              | `astro dev` — local dev server                                   |
+| `pnpm build`            | `astro build` + write `dist/.assetsignore` for Cloudflare assets |
+| `pnpm preview`          | `pnpm build && wrangler dev` — run the built Worker locally      |
+| `pnpm sync`             | `astro sync` — regenerate content/types                          |
+| `pnpm check`            | `astro check` — Astro + template type diagnostics                |
+| `pnpm typecheck`        | `astro sync && tsc --noEmit`                                     |
+| `pnpm lint`             | `eslint .`                                                       |
+| `pnpm lint:fix`         | `eslint . --fix`                                                 |
+| `pnpm format`           | `prettier --write .`                                             |
+| `pnpm format:check`     | `prettier --check .`                                             |
+| `pnpm test`             | `vitest run`                                                     |
+| `pnpm test:watch`       | `vitest`                                                         |
+| `pnpm cf-typegen`       | regenerate `worker-configuration.d.ts` from `wrangler.jsonc`     |
+| `pnpm cf-typegen:check` | verify generated Worker types are current in CI                  |
 
-Before opening a PR, run: `pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
+Before opening a PR, run: `pnpm cf-typegen:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
 CI must be green to merge.
 
 ---
@@ -270,7 +303,7 @@ CI must be green to merge.
 2. Edit **`src/config.ts`** (`SITE` + `TURNSTILE_SITE_KEY`) and drop in brand assets.
 3. `cp .dev.vars.example .dev.vars` and fill local secrets; `pnpm dev`.
 4. Deploy on Cloudflare: create the Worker project, `wrangler r2 bucket create <name>` and
-   point `wrangler.jsonc` at it, `wrangler secret put` the real secrets, connect the domain +
+   point `wrangler.jsonc` at it, run `pnpm cf-typegen`, `wrangler secret put` the real secrets, connect the domain +
    DNS, add 301s via **Cloudflare Bulk Redirects**, verify Search Console and submit the sitemap.
 
 Full step-by-step lives in **`README.md`**; the deploy checklist is the **`zikra-deploy`** skill.
@@ -279,13 +312,26 @@ Full step-by-step lives in **`README.md`**; the deploy checklist is the **`zikra
 
 ## 11. Skills catalog
 
-Six skills live in `.claude/skills/`. Reach for the matching skill instead of improvising.
+Zikra skills live in both `.agents/skills/` and `.claude/skills/`. Reach for the matching skill
+instead of improvising.
 
-| Skill              | Use it when…                                                                   |
-| ------------------ | ------------------------------------------------------------------------------ |
-| `zikra-page`       | Adding a new static page — correct `BaseLayout` usage, SEO props, zero-JS default. |
-| `zikra-blog-post`  | Writing a new MDX blog post — frontmatter schema, images, tags, drafts.        |
-| `zikra-form`       | Adding or changing a form — the ContactForm island, zod schema, and the Action pipeline (Turnstile → R2 → Plunk → Z360). |
-| `zikra-seo-audit`  | Pre-launch SEO review — meta, canonicals, JSON-LD, sitemap/robots, GA4, alt text. |
-| `zikra-deploy`     | Shipping a site to Cloudflare — R2 bucket, secrets, domain/DNS, redirects, Search Console. |
-| `zikra-update`     | A coordinated, template-wide dependency bump (e.g. the eventual Astro 5 → next major). |
+| Skill             | Use it when…                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `zikra-page`      | Adding a new static page — correct `BaseLayout` usage, SEO props, zero-JS default.                                       |
+| `zikra-blog-post` | Writing a new MDX blog post — frontmatter schema, images, tags, drafts.                                                  |
+| `zikra-form`      | Adding or changing a form — the ContactForm island, zod schema, and the Action pipeline (Turnstile → R2 → Plunk → Z360). |
+| `zikra-seo-audit` | Pre-launch SEO review — meta, canonicals, JSON-LD, sitemap/robots, GA4, alt text.                                        |
+| `zikra-deploy`    | Shipping a site to Cloudflare — R2 bucket, secrets, domain/DNS, redirects, Search Console.                               |
+| `zikra-update`    | A coordinated, template-wide dependency bump (e.g. the eventual Astro 5 → next major).                                   |
+
+Installed external skills:
+
+| Skill                    | Source / use                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `frontend-design`        | Anthropic skill for rich frontend artifacts and visual QA.                               |
+| `cloudflare`             | Cloudflare platform guidance and docs routing.                                           |
+| `wrangler`               | Cloudflare Workers CLI commands, deploys, secrets, R2, and typegen.                      |
+| `workers-best-practices` | Workers production review: bindings, secrets, observability, promises, runtime patterns. |
+| `turnstile-spin`         | Turnstile setup and verification workflow.                                               |
+| `web-perf`               | Performance/Core Web Vitals audits.                                                      |
+| `seo-audit`              | Marketing SEO audit helper, used alongside `zikra-seo-audit`.                            |

@@ -2,18 +2,25 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zikra-astro-starter",
   "main": "./dist/_worker.js/index.js",
-  "compatibility_date": "2025-07-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
   // Serve the prerendered Astro output as static assets; the Worker handles
   // only on-demand routes (the Actions endpoint).
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist"
+    "directory": "./dist",
   },
 
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+
+  // Required Worker Secrets. Wrangler validates these on deploy and includes
+  // them in generated binding types without reading local .dev.vars.
+  "secrets": {
+    "required": ["TURNSTILE_SECRET", "PLUNK_API_KEY"],
   },
 
   // R2 bucket for the "never lose a lead" backup (see src/actions & AGENTS.md).
@@ -22,11 +29,11 @@
   "r2_buckets": [
     {
       "binding": "LEADS_BUCKET",
-      "bucket_name": "zikra-leads"
-    }
-  ]
+      "bucket_name": "zikra-leads",
+    },
+  ],
 
-  // Secrets (TURNSTILE_SECRET, PLUNK_API_KEY, Z360_TOKEN) are NEVER listed here.
-  // Local dev reads them from .dev.vars; production uses Worker Secrets:
+  // Secret values are NEVER listed here. Local dev reads values from .dev.vars;
+  // production uses Worker Secrets:
   //   wrangler secret put TURNSTILE_SECRET
 }

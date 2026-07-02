@@ -19,23 +19,30 @@ conventions. This file is about _how you work_.
 ## Use the skills
 
 Reach for the matching skill instead of improvising — they encode the conventions below.
+Project skills are mirrored in `.agents/skills` and `.claude/skills` so Codex and Claude Code
+see the same playbooks. Verify discovery with `npx skills list --json` after changing skills.
 
-| Task                              | Skill             |
-| --------------------------------- | ----------------- |
-| New static page                   | `zikra-page`      |
-| New MDX blog post                 | `zikra-blog-post` |
-| Add / change a form               | `zikra-form`      |
-| Pre-launch SEO review             | `zikra-seo-audit` |
-| Deploy a site to Cloudflare       | `zikra-deploy`    |
-| Coordinated dependency bump       | `zikra-update`    |
+| Task                        | Skill             |
+| --------------------------- | ----------------- |
+| New static page             | `zikra-page`      |
+| New MDX blog post           | `zikra-blog-post` |
+| Add / change a form         | `zikra-form`      |
+| Pre-launch SEO review       | `zikra-seo-audit` |
+| Deploy a site to Cloudflare | `zikra-deploy`    |
+| Coordinated dependency bump | `zikra-update`    |
+
+The repo also includes external skills for `frontend-design`, `cloudflare`, `wrangler`,
+`workers-best-practices`, `turnstile-spin`, `web-perf`, and `seo-audit`. Their source and hashes
+are tracked in `skills-lock.json`.
 
 ---
 
 ## Coding conventions
 
 - **TypeScript strict.** No `any` escape hatches (the only relaxation is the vendored
-  `src/components/ui/*` primitives). Type Worker bindings/secrets via the global `Env`
-  interface and `context.locals.runtime.env`.
+  `src/components/ui/*` primitives). Worker bindings/secrets are generated from `wrangler.jsonc`
+  into `worker-configuration.d.ts`, then exposed to Astro through the global `Env` interface and
+  `context.locals.runtime.env`.
 - **Path alias:** import with `@/…` (→ `src/…`), not long relative paths.
 - **Static by default, zero JS.** Pages are prerendered and ship no client JS. Add
   interactivity only where needed, as a small React island with an explicit `client:*`
@@ -54,13 +61,18 @@ Reach for the matching skill instead of improvising — they encode the conventi
   for real per-site values, `src/env.d.ts`, `src/styles/globals.css`, `src/lib/utils.ts`,
   `src/components/ui/*`, the shared `Seo`/`Header`/`Footer`/`BaseLayout`). Do not upgrade
   dependencies — see the Astro-5-pinned note in `AGENTS.md`.
+- If `wrangler.jsonc` changes, run `pnpm cf-typegen` and commit the updated
+  `worker-configuration.d.ts`.
+- Keep `scripts/write-assetsignore.mjs` in the build path. It writes `dist/.assetsignore` so
+  Wrangler uploads static files without publishing `dist/_worker.js` as a public asset.
 
 ---
 
 ## Secrets — never commit them
 
-- `TURNSTILE_SECRET`, `PLUNK_API_KEY`, `Z360_TOKEN` live **only** in Cloudflare Worker Secrets
-  (prod) and the **gitignored `.dev.vars`** (local). Read them at runtime via
+- `TURNSTILE_SECRET` and `PLUNK_API_KEY` are required Worker Secrets in `wrangler.jsonc`.
+  `Z360_TOKEN` is optional and only needed when a site enables the CRM push.
+- Secrets live **only** in Cloudflare Worker Secrets (prod) and the **gitignored `.dev.vars`** (local). Read them at runtime via
   `context.locals.runtime.env` — **never** `import.meta.env`, `process.env`, or hardcoded.
 - Non-secret, build-time config (including the **public** Turnstile _site_ key) goes in
   `src/config.ts`.
@@ -73,11 +85,12 @@ Reach for the matching skill instead of improvising — they encode the conventi
 Run the full gate locally and make sure it passes:
 
 ```bash
-pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build
+pnpm cf-typegen:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
 
 CI runs the same steps (`lint → check → typecheck → test → build`) on every PR and push to
-`main`. **CI must be green to merge.** No Playwright/e2e — QA is a human role.
+`main`, with an additional Cloudflare typegen check before linting. **CI must be green to merge.**
+No Playwright/e2e — QA is a human role.
 
 ---
 
@@ -107,3 +120,14 @@ CI runs the same steps (`lint → check → typecheck → test → build`) on ev
   Document non-obvious props with JSDoc.
 
 The shadcn MCP server (see `.mcp.json`) is available to browse components and blocks.
+
+The Astro Docs MCP server is also configured at the project level:
+
+- `.mcp.json` is the shared HTTP MCP config used by Claude Code and other tools that read the
+  common MCP JSON shape.
+- `.codex/config.toml` is the Codex CLI project config. It uses `npx -y mcp-remote` because
+  Codex expects a local stdio command while Astro's docs server is a remote streamable HTTP MCP
+  server.
+
+Keep both files committed. Do not add `mcp-remote` to `package.json`; it is a tool bridge that
+`npx` can fetch automatically, not part of the production site stack.

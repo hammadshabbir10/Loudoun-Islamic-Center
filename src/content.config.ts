@@ -11,28 +11,38 @@ import { SITE } from "@/config";
 const blog = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
   schema: ({ image }) =>
-    z.object({
-      /** ~50–60 chars. Becomes the H1 and <title>. */
-      title: z.string().min(1).max(70),
-      /** Meta description, ~150–160 chars. */
-      description: z.string().min(50).max(170),
-      /** Publish date (drives ordering, sitemap, RSS). */
-      pubDate: z.coerce.date(),
-      /** Optional last-updated date. */
-      updatedDate: z.coerce.date().optional(),
-      /** Byline. Defaults to SITE.defaultAuthor. */
-      author: z.string().default(SITE.defaultAuthor),
-      /** Lowercase tags for tag pages + related posts. */
-      tags: z.array(z.string()).default([]),
-      /** Hero image, imported so astro:assets can optimize it. */
-      image: image().optional(),
-      /** Required alt text when `image` is set (enforced at build in the layout). */
-      imageAlt: z.string().optional(),
-      /** Hide from listings/sitemap/RSS while WIP. */
-      draft: z.boolean().default(false),
-      /** Canonical URL if the post is syndicated from elsewhere. */
-      canonical: z.string().url().optional(),
-    }),
+    z
+      .object({
+        /** ~50–60 chars. Becomes the H1 and <title>. */
+        title: z.string().min(1).max(70),
+        /** Meta description, ~150–160 chars. */
+        description: z.string().min(50).max(170),
+        /** Publish date (drives ordering, sitemap, RSS). */
+        pubDate: z.coerce.date(),
+        /** Optional last-updated date. */
+        updatedDate: z.coerce.date().optional(),
+        /** Byline. Defaults to SITE.defaultAuthor. */
+        author: z.string().default(SITE.defaultAuthor),
+        /** Lowercase tags for tag pages + related posts. */
+        tags: z.array(z.string()).default([]),
+        /** Hero image, imported so astro:assets can optimize it. */
+        image: image().optional(),
+        /** Required alt text when `image` is set. */
+        imageAlt: z.string().optional(),
+        /** Hide from listings/sitemap/RSS while WIP. */
+        draft: z.boolean().default(false),
+        /** Canonical URL if the post is syndicated from elsewhere. */
+        canonical: z.string().url().optional(),
+      })
+      .superRefine((data, ctx) => {
+        if (data.image && !data.imageAlt?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["imageAlt"],
+            message: "imageAlt is required when image is set.",
+          });
+        }
+      }),
 });
 
 export const collections = { blog };
