@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zikra-astro-starter",
-  "main": "./dist/_worker.js/index.js",
-  "compatibility_date": "2026-07-01",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-07-14",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
   // Serve the prerendered Astro output as static assets; the Worker handles

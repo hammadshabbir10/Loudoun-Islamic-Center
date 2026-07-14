@@ -14,16 +14,15 @@ A production starter for fast, secure marketing sites: static-first Astro render
 Cloudflare edge, with a single on-demand Worker route powering a "never lose a lead" forms
 pipeline. Every page is prerendered; interactivity is added surgically with React islands.
 
-### The Astro-5-pinned note (READ THIS)
+### The supported-Astro-baseline note (READ THIS)
 
-**Astro is pinned to 5.18 deliberately.** Astro 7 is the current latest release, but the
-Zikra spec locks Astro 5 so all ~50 forked sites stay on one predictable, verified baseline.
-This is the **one intentional deviation** from "always use latest".
+**Astro is pinned to the verified Astro 7 major.** All forked sites should share this supported,
+security-patched baseline instead of upgrading framework majors independently.
 
 - Do **not** run `astro add`, `pnpm add`, `pnpm up`, or otherwise bump Astro (or any locked
   dependency) inside a site or in this template. Everything you need is already installed.
-- Use current **Astro 5** APIs only — do not reach for APIs introduced in Astro 6/7.
-- A future major bump is a coordinated, template-wide effort. When that time comes, use the
+- Use current **Astro 7** APIs only; do not adopt experimental APIs in the starter.
+- A future major bump is a coordinated, template-wide effort. Use the
   **`zikra-update`** skill; do not upgrade ad hoc.
 
 ---
@@ -34,7 +33,7 @@ Do not change, upgrade, or add dependencies — the lockfile is authoritative.
 
 | Area       | Choice                                                                               |
 | ---------- | ------------------------------------------------------------------------------------ |
-| Framework  | **Astro 5.18** (pinned), TypeScript **strict**, **pnpm**                             |
+| Framework  | **Astro 7** (pinned major), Node **22+**, TypeScript **strict**, **pnpm**            |
 | Hosting    | Cloudflare **Workers** via `@astrojs/cloudflare` (`output: "static"`)                |
 | Styling    | **Tailwind v4** (`@tailwindcss/vite`)                                                |
 | UI islands | `@astrojs/react` + **shadcn/ui** (new-york style), **lucide-react** icons            |
@@ -80,7 +79,7 @@ worker-configuration.d.ts     ← generated Wrangler binding/secret types
 package.json  eslint.config.js  .prettierrc.json  vitest.config.ts
 components.json               ← shadcn config (new-york, neutral, @/ aliases)
 tsconfig.json                 ← strict; "@/*" → "./src/*"
-scripts/write-assetsignore.mjs ← writes dist/.assetsignore so Worker code is not uploaded as an asset
+scripts/write-assetsignore.mjs ← preserves dist/client/.assetsignore for safe asset uploads
 src/
   config.ts                   ← per-site config (SITE, TURNSTILE_SITE_KEY)
   env.d.ts                    ← Astro App.Locals bridge for generated Worker Env
@@ -88,6 +87,7 @@ src/
   lib/
     utils.ts                  ← cn() class-merge helper
     schema.ts                 ← zod schemas (lead form)
+    lead-pipeline.ts          ← testable Turnstile → R2 → Plunk → Z360 orchestration
     turnstile.ts              ← Turnstile server-side verification
     plunk.ts                  ← Plunk transactional email client
     r2.ts                     ← R2 lead backup helper
@@ -107,7 +107,7 @@ src/
     blog/index.astro  blog/[...slug].astro  blog/tags/[tag].astro
     rss.xml.ts  llms.txt.ts
   actions/index.ts            ← the ONE Astro Action (forms pipeline)
-tests/lead.test.ts            ← Vitest unit test for the lead schema/pipeline
+tests/lead*.test.ts           ← Vitest tests for schema, payloads, ordering, and failures
 ```
 
 ---
@@ -212,7 +212,7 @@ and Astro's a11y rules run in ESLint.
 One flow, one Action. **shadcn form island (`ContactForm.tsx`) → the single Astro Action in
 `src/actions/index.ts`.** The React island calls the Action as JSON through `astro:actions`;
 if a future no-JS form is added, deliberately change that Action path to `accept: "form"` and
-update the skills/docs together. The Action, in order:
+update the skills/docs together. The Action delegates to the testable lead pipeline, in order:
 
 1. **Verifies Turnstile** (`src/lib/turnstile.ts`) against `TURNSTILE_SECRET`.
 2. **Backs up the lead to R2** as `leads/<id>.json` (`src/lib/r2.ts`, binding `LEADS_BUCKET`).
@@ -231,8 +231,8 @@ on both the client (react-hook-form resolver) and the server (the Action).
   `wrangler.jsonc`, validated by Wrangler on deploy, and included in
   `worker-configuration.d.ts`. `Z360_TOKEN` is optional and only required on sites that enable
   the CRM push.
-- These secrets live **only** in Cloudflare Worker Secrets (`wrangler secret put <NAME>`), read at runtime from
-  **`context.locals.runtime.env`** (typed via the global `Env` interface / `App.Locals`).
+- These secrets live **only** in Cloudflare Worker Secrets (`wrangler secret put <NAME>`) and
+  are imported server-side from **`cloudflare:workers`**, typed by Wrangler-generated bindings.
 - **Never** read secrets from `import.meta.env` or `process.env`, and **never** hardcode them.
 - **Never commit secrets.** Local dev uses a **gitignored `.dev.vars`** (copy from
   `.dev.vars.example`). The public Turnstile **site** key and other non-secret config live in
@@ -275,24 +275,26 @@ Run the **`zikra-seo-audit`** skill before launch.
 
 All via pnpm.
 
-| Command                 | What it does                                                     |
-| ----------------------- | ---------------------------------------------------------------- |
-| `pnpm dev`              | `astro dev` — local dev server                                   |
-| `pnpm build`            | `astro build` + write `dist/.assetsignore` for Cloudflare assets |
-| `pnpm preview`          | `pnpm build && wrangler dev` — run the built Worker locally      |
-| `pnpm sync`             | `astro sync` — regenerate content/types                          |
-| `pnpm check`            | `astro check` — Astro + template type diagnostics                |
-| `pnpm typecheck`        | `astro sync && tsc --noEmit`                                     |
-| `pnpm lint`             | `eslint .`                                                       |
-| `pnpm lint:fix`         | `eslint . --fix`                                                 |
-| `pnpm format`           | `prettier --write .`                                             |
-| `pnpm format:check`     | `prettier --check .`                                             |
-| `pnpm test`             | `vitest run`                                                     |
-| `pnpm test:watch`       | `vitest`                                                         |
-| `pnpm cf-typegen`       | regenerate `worker-configuration.d.ts` from `wrangler.jsonc`     |
-| `pnpm cf-typegen:check` | verify generated Worker types are current in CI                  |
+| Command                 | What it does                                                 |
+| ----------------------- | ------------------------------------------------------------ |
+| `pnpm dev`              | `astro dev` — local dev server                               |
+| `pnpm build`            | `astro build` + preserve `dist/client/.assetsignore`         |
+| `pnpm preview`          | `pnpm build && wrangler dev` — run the built Worker locally  |
+| `pnpm sync`             | `astro sync` — regenerate content/types                      |
+| `pnpm check`            | `astro check` — Astro + template type diagnostics            |
+| `pnpm typecheck`        | `astro sync && tsc --noEmit`                                 |
+| `pnpm lint`             | `eslint .`                                                   |
+| `pnpm lint:fix`         | `eslint . --fix`                                             |
+| `pnpm format`           | `prettier --write .`                                         |
+| `pnpm format:check`     | `prettier --check .`                                         |
+| `pnpm test`             | `vitest run`                                                 |
+| `pnpm test:watch`       | `vitest`                                                     |
+| `pnpm audit`            | fail on high/critical dependency advisories                  |
+| `pnpm verify:build`     | verify build artifacts and JavaScript budgets                |
+| `pnpm cf-typegen`       | regenerate `worker-configuration.d.ts` from `wrangler.jsonc` |
+| `pnpm cf-typegen:check` | verify generated Worker types are current in CI              |
 
-Before opening a PR, run: `pnpm cf-typegen:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
+Before opening a PR, run: `pnpm install --frozen-lockfile && pnpm cf-typegen:check && pnpm format:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm verify:build && pnpm audit`.
 CI must be green to merge.
 
 ---
@@ -322,7 +324,7 @@ instead of improvising.
 | `zikra-form`      | Adding or changing a form — the ContactForm island, zod schema, and the Action pipeline (Turnstile → R2 → Plunk → Z360). |
 | `zikra-seo-audit` | Pre-launch SEO review — meta, canonicals, JSON-LD, sitemap/robots, GA4, alt text.                                        |
 | `zikra-deploy`    | Shipping a site to Cloudflare — R2 bucket, secrets, domain/DNS, redirects, Search Console.                               |
-| `zikra-update`    | A coordinated, template-wide dependency bump (e.g. the eventual Astro 5 → next major).                                   |
+| `zikra-update`    | A coordinated dependency update or future framework-major migration.                                                     |
 
 Installed external skills:
 

@@ -14,13 +14,11 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -28,6 +26,9 @@ jobs:
 
       - name: Cloudflare binding typegen
         run: pnpm cf-typegen:check
+
+      - name: Formatting
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint
@@ -43,3 +44,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Build artifact and performance checks
+        run: pnpm verify:build
+
+      - name: Dependency audit
+        run: pnpm audit

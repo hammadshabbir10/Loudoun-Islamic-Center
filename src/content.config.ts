@@ -32,12 +32,12 @@ const blog = defineCollection({
         /** Hide from listings/sitemap/RSS while WIP. */
         draft: z.boolean().default(false),
         /** Canonical URL if the post is syndicated from elsewhere. */
-        canonical: z.string().url().optional(),
+        canonical: z.url().optional(),
       })
       .superRefine((data, ctx) => {
         if (data.image && !data.imageAlt?.trim()) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             path: ["imageAlt"],
             message: "imageAlt is required when image is set.",
           });

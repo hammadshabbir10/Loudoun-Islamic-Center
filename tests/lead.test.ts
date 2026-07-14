@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { leadSchema, type LeadInput } from "@/lib/schema";
 import { buildPlunkPayload } from "@/lib/plunk";
 import { buildLeadRecord } from "@/lib/r2";
+import { buildTurnstileBody } from "@/lib/turnstile";
 import { buildZ360Payload } from "@/lib/z360";
 
 const validLead: LeadInput = {
@@ -76,6 +77,20 @@ describe("buildLeadRecord", () => {
     expect(record.id).toBe("abc-123");
     expect(record.receivedAt).toBe("2026-07-01T00:00:00.000Z");
     expect(record.email).toBe(validLead.email);
+  });
+});
+
+describe("buildTurnstileBody", () => {
+  it("includes the token, secret and optional client IP", () => {
+    const body = buildTurnstileBody(
+      "turnstile-token",
+      "turnstile-secret",
+      "203.0.113.10",
+    );
+
+    expect(body.get("response")).toBe("turnstile-token");
+    expect(body.get("secret")).toBe("turnstile-secret");
+    expect(body.get("remoteip")).toBe("203.0.113.10");
   });
 });
 

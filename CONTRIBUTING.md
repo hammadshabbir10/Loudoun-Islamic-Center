@@ -41,8 +41,8 @@ are tracked in `skills-lock.json`.
 
 - **TypeScript strict.** No `any` escape hatches (the only relaxation is the vendored
   `src/components/ui/*` primitives). Worker bindings/secrets are generated from `wrangler.jsonc`
-  into `worker-configuration.d.ts`, then exposed to Astro through the global `Env` interface and
-  `context.locals.runtime.env`.
+  into `worker-configuration.d.ts`, then exposed through the typed `env` import from
+  `cloudflare:workers`.
 - **Path alias:** import with `@/…` (→ `src/…`), not long relative paths.
 - **Static by default, zero JS.** Pages are prerendered and ship no client JS. Add
   interactivity only where needed, as a small React island with an explicit `client:*`
@@ -60,11 +60,11 @@ are tracked in `skills-lock.json`.
   `tsconfig.json`, `wrangler.jsonc`, ESLint/Prettier/Vitest configs, `src/config.ts` except
   for real per-site values, `src/env.d.ts`, `src/styles/globals.css`, `src/lib/utils.ts`,
   `src/components/ui/*`, the shared `Seo`/`Header`/`Footer`/`BaseLayout`). Do not upgrade
-  dependencies — see the Astro-5-pinned note in `AGENTS.md`.
+  dependencies — see the supported-Astro-baseline note in `AGENTS.md`.
 - If `wrangler.jsonc` changes, run `pnpm cf-typegen` and commit the updated
   `worker-configuration.d.ts`.
-- Keep `scripts/write-assetsignore.mjs` in the build path. It writes `dist/.assetsignore` so
-  Wrangler uploads static files without publishing `dist/_worker.js` as a public asset.
+- Keep `scripts/write-assetsignore.mjs` in the build path. It preserves the Cloudflare adapter's
+  `dist/client/.assetsignore` so Wrangler never uploads local secrets or generated config files.
 
 ---
 
@@ -72,8 +72,9 @@ are tracked in `skills-lock.json`.
 
 - `TURNSTILE_SECRET` and `PLUNK_API_KEY` are required Worker Secrets in `wrangler.jsonc`.
   `Z360_TOKEN` is optional and only needed when a site enables the CRM push.
-- Secrets live **only** in Cloudflare Worker Secrets (prod) and the **gitignored `.dev.vars`** (local). Read them at runtime via
-  `context.locals.runtime.env` — **never** `import.meta.env`, `process.env`, or hardcoded.
+- Secrets live **only** in Cloudflare Worker Secrets (prod) and the **gitignored `.dev.vars`**
+  (local). Import them on the server from `cloudflare:workers` — **never** `import.meta.env`,
+  `process.env`, or hardcoded.
 - Non-secret, build-time config (including the **public** Turnstile _site_ key) goes in
   `src/config.ts`.
 - If you ever commit a secret, treat it as compromised: rotate it immediately.
@@ -85,12 +86,29 @@ are tracked in `skills-lock.json`.
 Run the full gate locally and make sure it passes:
 
 ```bash
-pnpm cf-typegen:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build
+pnpm install --frozen-lockfile && pnpm cf-typegen:check && pnpm format:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm verify:build && pnpm audit
 ```
 
-CI runs the same steps (`lint → check → typecheck → test → build`) on every PR and push to
-`main`, with an additional Cloudflare typegen check before linting. **CI must be green to merge.**
+CI runs the same typegen, format, lint, check, typecheck, test, build, artifact, performance, and
+security gates on every PR and push to `main`. **CI must be green to merge.**
 No Playwright/e2e — QA is a human role.
+
+---
+
+## Template maintenance and releases
+
+- Review grouped Dependabot patch/minor PRs at least monthly. Handle high/critical advisories
+  immediately instead of waiting for the maintenance window.
+- Keep dependency majors isolated from one another and use `zikra-update`; Astro and its official
+  integrations move together in a dedicated migration PR.
+- Before merging a template release, require one approving review, the `verify` CI job, and a
+  successful non-production Cloudflare preview. Repository administrators should enforce those
+  controls with a `main` branch ruleset when the GitHub organization plan supports private-repo
+  rulesets.
+- After merge, update `package.json`, add the matching `vX.Y.Z` tag, and publish GitHub Release
+  notes from `CHANGELOG.md`. Do not tag a release from an unmerged feature branch.
+- Keep dependency graph, Dependabot alerts/security updates, secret scanning, and push protection
+  enabled in repository security settings wherever the GitHub plan makes them available.
 
 ---
 
