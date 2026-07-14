@@ -8,3 +8,9 @@ allowBuilds:
   workerd: true
 minimumReleaseAgeExclude:
   - lucide-react@1.23.0
+
+# eslint-plugin-jsx-a11y has not yet widened its peer range to ESLint 10, but
+# the current plugin passes this repository's full React accessibility lint.
+peerDependencyRules:
+  allowedVersions:
+    "eslint-plugin-jsx-a11y>eslint": "10"

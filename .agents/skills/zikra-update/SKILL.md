@@ -1,6 +1,6 @@
 ---
 name: zikra-update
-description: Use when safely updating an existing forked Zikra site — pulling starter improvements from the upstream template via a git remote (merge/cherry-pick), deliberately bumping dependencies (mind the Astro 5 → newer-major consideration), running the full green-CI gate (install, check, typecheck, lint, test, build), fixing breakages, and deploying to a Cloudflare preview first before promoting to production.
+description: Use when safely updating an existing forked Zikra site — comparing starter release tags, pulling improvements through an upstream remote, deliberately bumping dependencies, running the full green-CI gate, and deploying to a Cloudflare preview before production.
 ---
 
 # Safely update an existing Zikra site
@@ -25,6 +25,9 @@ git fetch starter
 Then bring in changes deliberately — prefer cherry-picking specific improvements over a blind merge, because forks diverge in the per-site files:
 
 ```bash
+# Compare the fork's recorded package version/tag with current releases:
+git tag --list 'v*' --sort=-version:refname
+
 # Review what's new upstream first:
 git log --oneline HEAD..starter/main
 
@@ -39,10 +42,10 @@ git merge starter/main
 
 ## 2. Bump dependencies deliberately
 
-The stack is **pinned on purpose**. Astro is locked to **5.x** (a newer major exists, but the spec locks Astro 5). Do **not** casually jump majors.
+The stack is **pinned to the template's verified Astro 7 major**. Do **not** casually jump framework or tooling majors.
 
 - Patch/minor within the pinned lines are generally safe — update, then run the full gate below.
-- A major bump (Astro 5 → newer, React, Tailwind v4 → next, the Cloudflare adapter, wrangler) is a **separate, intentional migration**: read that package's migration guide, do it on its own branch, and expect breakages. Coordinate with the template — the fork should track whatever majors the starter has adopted, not lead them.
+- A major bump (Astro 7 → newer, React, Tailwind, the Cloudflare adapter, Wrangler) is a **separate, intentional migration**: read the migration guide, do it on its own branch, and expect breakages. A fork tracks majors already released by the starter; it does not lead them.
 - Use `pnpm` only. After editing versions:
 
 ```bash
@@ -54,13 +57,16 @@ pnpm install
 Run the full sequence. Every step must pass before you deploy anything:
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm cf-typegen:check  # generated Worker bindings/secrets match wrangler.jsonc
+pnpm format:check  # formatting is part of CI
 pnpm check        # astro check — types + templates
 pnpm typecheck    # astro sync && tsc --noEmit
 pnpm lint         # eslint
 pnpm test         # vitest run
 pnpm build        # astro build — the production build must succeed
+pnpm verify:build # routes, Worker output, .assetsignore, JS budgets
+pnpm audit        # no high/critical dependency advisories
 ```
 
 `pnpm format` (or `pnpm lint:fix`) to auto-fix style. If any step fails, **fix the breakage** before proceeding — do not skip a step or deploy on red. Common breakages after an update: renamed Astro APIs, changed shadcn/Radix props, stricter TypeScript, or a moved config option.

@@ -2,9 +2,8 @@ import { z } from "zod";
 
 /**
  * Email validation via an explicit regex rather than zod's string `.email()`.
- * It's deterministic across every runtime and sidesteps the string `.email()`
- * deprecation coming in zod v4 (moved to top-level `z.email()`) — one less
- * thing to touch when the zikra-update skill bumps the major.
+ * It is deterministic across every runtime and keeps the validation message
+ * stable without depending on Zod's built-in email pattern.
  */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

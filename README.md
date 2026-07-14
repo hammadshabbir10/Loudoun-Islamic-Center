@@ -5,13 +5,12 @@ repo**: you create a new repo from it, edit one config file, add content, and de
 Cloudflare edge. Every page is prerendered static HTML; a single Worker route powers a
 "never lose a lead" contact-form pipeline.
 
-**Stack:** Astro 5 · Cloudflare Workers · Tailwind v4 · shadcn/ui (React islands) · MDX blog ·
+**Stack:** Astro 7 · Cloudflare Workers · Tailwind v4 · shadcn/ui (React islands) · MDX blog ·
 astro-seo · Vitest.
 
-> **Astro is pinned to 5.18 on purpose.** Astro 7 is the current latest, but the Zikra spec
-> locks Astro 5 so every forked site shares one verified baseline. Do **not** upgrade Astro or
-> any locked dependency ad hoc — a major bump is a coordinated, template-wide effort (see the
-> `zikra-update` skill). This is the one intentional deviation from "always latest".
+> **Astro is pinned to the verified Astro 7 major.** Do not upgrade framework majors or locked
+> dependencies ad hoc. Major changes are coordinated in the starter with the `zikra-update`
+> skill, green CI, and a Cloudflare preview before forks adopt them.
 
 - **Daily reference (team + agents):** [`AGENTS.md`](./AGENTS.md)
 - **Building on the template:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)
@@ -20,7 +19,7 @@ astro-seo · Vitest.
 
 ## Prerequisites
 
-- **Node.js ≥ 20.11** and **pnpm** (repo pins `pnpm@11`; `corepack enable` will honor it).
+- **Node.js ≥ 22** and **pnpm** (repo pins `pnpm@11`; `corepack enable` will honor it).
 - A **Cloudflare account** (Workers + R2) and **Wrangler** (installed as a dev dependency).
 - A **Plunk** account for transactional email — <https://useplunk.com>.
 - Optional: a **Z360** CRM token if you want leads pushed to the CRM.
@@ -113,8 +112,8 @@ pnpm cf-typegen
 
 > **Secrets rule:** `TURNSTILE_SECRET` and `PLUNK_API_KEY` are required Worker Secrets declared
 > in `wrangler.jsonc`; `Z360_TOKEN` is optional and only needed when `z360Enabled` is true. Secrets
-> live only in Worker Secrets (prod) / the gitignored `.dev.vars` (local), and are read at runtime
-> from `context.locals.runtime.env`. Never `import.meta.env`, never `process.env`, never hardcoded.
+> live only in Worker Secrets (prod) / the gitignored `.dev.vars` (local), and are imported on the
+> server from `cloudflare:workers`. Never `import.meta.env`, never `process.env`, never hardcoded.
 
 ### 3. Ship & verify
 
@@ -128,25 +127,35 @@ pnpm cf-typegen
 
 ## Command reference
 
-| Command                 | Description                                                         |
-| ----------------------- | ------------------------------------------------------------------- |
-| `pnpm dev`              | Start the local dev server (`astro dev`).                           |
-| `pnpm build`            | Production build plus `dist/.assetsignore` for safe Workers assets. |
-| `pnpm preview`          | Build, then run the Worker locally (`wrangler dev`).                |
-| `pnpm sync`             | Regenerate content collection + Astro types.                        |
-| `pnpm check`            | Astro + template type diagnostics (`astro check`).                  |
-| `pnpm typecheck`        | `astro sync && tsc --noEmit`.                                       |
-| `pnpm lint`             | ESLint (`eslint .`).                                                |
-| `pnpm lint:fix`         | ESLint with autofix.                                                |
-| `pnpm format`           | Prettier write (`prettier --write .`).                              |
-| `pnpm format:check`     | Prettier check.                                                     |
-| `pnpm test`             | Vitest unit tests (`vitest run`).                                   |
-| `pnpm test:watch`       | Vitest in watch mode.                                               |
-| `pnpm cf-typegen`       | Regenerate `worker-configuration.d.ts` from Wrangler config.        |
-| `pnpm cf-typegen:check` | Verify generated Worker types are current.                          |
+| Command                 | Description                                                      |
+| ----------------------- | ---------------------------------------------------------------- |
+| `pnpm dev`              | Start the local dev server (`astro dev`).                        |
+| `pnpm build`            | Production build plus safe `dist/client/.assetsignore` handling. |
+| `pnpm preview`          | Build, then run the Worker locally (`wrangler dev`).             |
+| `pnpm sync`             | Regenerate content collection + Astro types.                     |
+| `pnpm check`            | Astro + template type diagnostics (`astro check`).               |
+| `pnpm typecheck`        | `astro sync && tsc --noEmit`.                                    |
+| `pnpm lint`             | ESLint (`eslint .`).                                             |
+| `pnpm lint:fix`         | ESLint with autofix.                                             |
+| `pnpm format`           | Prettier write (`prettier --write .`).                           |
+| `pnpm format:check`     | Prettier check.                                                  |
+| `pnpm test`             | Vitest unit tests (`vitest run`).                                |
+| `pnpm test:watch`       | Vitest in watch mode.                                            |
+| `pnpm audit`            | Fail on high/critical dependency advisories.                     |
+| `pnpm verify:build`     | Verify routes, Worker artifacts, and JavaScript budgets.         |
+| `pnpm cf-typegen`       | Regenerate `worker-configuration.d.ts` from Wrangler config.     |
+| `pnpm cf-typegen:check` | Verify generated Worker types are current.                       |
 
-Before a PR: `pnpm cf-typegen:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
+Before a PR: `pnpm install --frozen-lockfile && pnpm cf-typegen:check && pnpm format:check && pnpm check && pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm verify:build && pnpm audit`.
 CI must be green to merge.
+
+### Keeping forks current
+
+Template releases use the `package.json` version, a matching `vX.Y.Z` Git tag, and the release
+notes in `CHANGELOG.md`. Existing sites add this repository as a `starter` remote, compare their
+last applied tag with the newest release, and cherry-pick focused shared-infrastructure commits.
+Always preserve per-site config, content, assets, and Wrangler bindings during conflicts. Follow
+the mirrored `zikra-update` skill and validate on a non-production Cloudflare preview.
 
 ---
 
@@ -157,12 +166,12 @@ src/
   config.ts              per-site config (SITE, TURNSTILE_SITE_KEY) — edit this first
   layouts/               BaseLayout (SEO/JSON-LD/GA4/Header/Footer), BlogPost
   components/            Seo, Header, Footer, ContactForm island, ui/* (shadcn)
-  lib/                   utils, schema (zod), turnstile, plunk, r2, z360
+  lib/                   schema, testable lead pipeline, Turnstile, Plunk, R2, Z360
   content/blog/*.mdx     blog posts (typed via content.config.ts)
   pages/                 index, contact, blog/*, rss.xml.ts, llms.txt.ts
   actions/index.ts       the single Astro Action (forms pipeline)
 tests/                   Vitest unit tests
-scripts/write-assetsignore.mjs writes dist/.assetsignore after build
+scripts/write-assetsignore.mjs preserves dist/client/.assetsignore after build
 astro.config.mjs         locked — do not edit per-site
 wrangler.jsonc           Worker config: assets + R2 (LEADS_BUCKET)
 worker-configuration.d.ts generated Worker binding/secret types

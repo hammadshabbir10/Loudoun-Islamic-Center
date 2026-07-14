@@ -33,8 +33,8 @@ export default tseslint.config(
     },
   },
 
-  // Ambient declaration files use empty interfaces to augment global types
-  // (e.g. App.Locals extends the Cloudflare Runtime) — that's the idiom.
+  // Ambient declaration files use empty interfaces to augment generated
+  // platform types (e.g. the optional Cloudflare Z360 secret).
   {
     files: ["**/*.d.ts"],
     rules: {

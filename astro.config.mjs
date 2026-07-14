@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, sessionDrivers } from "astro/config";
 import { fileURLToPath } from "node:url";
 
 import cloudflare from "@astrojs/cloudflare";
@@ -18,14 +18,13 @@ export default defineConfig({
   // The Zikra stack does not use Astro sessions or Cloudflare KV. Declaring a
   // driver here stops the Cloudflare adapter from provisioning a default
   // KV-backed session store (which would require a `SESSION` KV binding).
-  session: { driver: "memory" },
+  session: { driver: sessionDrivers.lruCache() },
 
   // Static-first: every page is prerendered to the edge CDN. The Cloudflare
   // adapter emits a Worker only for on-demand routes (the Astro Action
   // endpoint that powers the forms pipeline).
   output: "static",
   adapter: cloudflare({
-    platformProxy: { enabled: true },
     // Optimize local images at build time with Sharp (astro:assets).
     imageService: "compile",
   }),
