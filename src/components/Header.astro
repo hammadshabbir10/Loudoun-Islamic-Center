@@ -1,50 +1,203 @@
 ---
 /**
- * Site header — plain Astro + Tailwind, zero JavaScript (per the Zikra
- * "static-looking layout stays plain Astro" rule). Swap in the shadcn
- * navigation-menu island only if a site needs interactive menus.
+ * Site header
+ * Logo: /public/logo_header.png
+ * To change logo update the src on line ~30 below.
  */
-import { SITE } from "@/config";
-
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/blog", label: "Blog" },
-  { href: "/contact", label: "Contact" },
-];
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+const moreItems = [
+  { href: "/zakat-calculator", label: "Zakat Calculator" },
+  { href: "/photo-gallery",    label: "Photo Gallery"   },
+  { href: "/video-gallery",    label: "Video Gallery"   },
+  { href: "/islamic-tenets",   label: "Islamic Tenets"  },
+];
 ---
 
-<header
-  class="border-border/60 bg-background/80 sticky top-0 z-40 border-b backdrop-blur"
->
-  <div
-    class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
+<!-- Floating rounded navbar -->
+<div class="pointer-events-none fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 md:px-8">
+  <header
+    id="site-header"
+    class="pointer-events-auto w-full max-w-[1400px] rounded-full border border-primary/10 bg-[#F3FAF6]/90 shadow-[0_4px_32px_rgba(10,43,29,0.15)] backdrop-blur-xl transition-[border-radius] duration-200"
   >
-    <a href="/" class="text-lg font-semibold tracking-tight">{SITE.name}</a>
-    <nav aria-label="Primary">
-      <ul class="flex items-center gap-6 text-sm">
-        {
-          links.map((link) => (
+    <div class="flex h-20 items-center justify-between px-6 md:h-24 md:px-10">
+
+      <!-- LOGO -->
+      <a href="/" class="group flex shrink-0 items-center gap-3">
+        <img
+          src="/logo_header.png"
+          alt="Loudoun Islamic Center Logo"
+          class="h-12 w-auto max-w-[180px] object-contain transition-transform duration-300 group-hover:scale-105 md:h-16"
+        />
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav aria-label="Primary" class="hidden md:block">
+        <ul class="flex items-center gap-6 text-sm font-medium">
+          {[
+            { href: "/",        label: "Home"    },
+            { href: "/about",   label: "About"   },
+            { href: "/services",label: "Services"},
+            { href: "/donate",  label: "Donate"  },
+            { href: "/livetv",  label: "LiveTV"  },
+            { href: "/contact", label: "Contact" },
+          ].map((link) => (
             <li>
               <a
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 class:list={[
-                  "hover:text-foreground transition-colors",
+                  "relative py-1 transition-colors",
                   isActive(link.href)
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground",
+                    ? "font-bold text-secondary"
+                    : "text-gray-600 hover:text-primary",
                 ]}
               >
                 {link.label}
+                {isActive(link.href) && (
+                  <span class="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-secondary"></span>
+                )}
               </a>
             </li>
-          ))
-        }
+          ))}
+
+          <!-- "More" dropdown -->
+          <li class="relative group/more">
+            <button
+              type="button"
+              class="flex items-center gap-1 py-1 text-gray-600 transition-colors hover:text-primary focus:outline-none"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              More
+              <svg class="h-3.5 w-3.5 transition-transform duration-200 group-hover/more:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <!-- Dropdown panel -->
+            <div class="invisible absolute right-0 top-full z-50 mt-2 w-48 origin-top-right scale-95 rounded-2xl border border-gray-100 bg-white py-2 opacity-0 shadow-xl ring-1 ring-black/5 transition-all duration-200 group-hover/more:visible group-hover/more:scale-100 group-hover/more:opacity-100">
+              {moreItems.map((item) => (
+                <a
+                  href={item.href}
+                  class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 transition-colors hover:bg-green-50 hover:text-primary"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-gold"></span>
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- CTA + Mobile Menu toggle -->
+      <div class="flex items-center gap-4">
+        <a
+          href="/donate"
+          class="hidden items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-primary/90 md:inline-flex"
+        >
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          Donate
+        </a>
+        <button
+          id="mobile-menu-toggle"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors hover:bg-black/5 md:hidden"
+          aria-label="Open menu"
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+        >
+          <svg class="menu-icon-open h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg class="menu-icon-close hidden h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu panel -->
+    <nav
+      id="mobile-menu"
+      aria-label="Mobile"
+      class="hidden border-t border-primary/10 px-6 pb-6 pt-4 md:hidden"
+    >
+      <ul class="flex flex-col gap-1 text-sm font-medium">
+        {[
+          { href: "/",         label: "Home"    },
+          { href: "/about",    label: "About"   },
+          { href: "/services", label: "Services"},
+          { href: "/donate",   label: "Donate"  },
+          { href: "/livetv",   label: "LiveTV"  },
+          { href: "/contact",  label: "Contact" },
+          ...moreItems,
+        ].map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class:list={[
+                "block rounded-xl px-4 py-3 transition-colors hover:bg-black/5",
+                isActive(link.href) ? "font-bold text-secondary" : "text-gray-600",
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li class="pt-2">
+          <a
+            href="/donate"
+            class="flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-primary/90"
+          >
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            Donate
+          </a>
+        </li>
       </ul>
     </nav>
-  </div>
-</header>
+  </header>
+</div>
+
+<script>
+  const toggle = document.getElementById("mobile-menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  const header = document.getElementById("site-header");
+  const iconOpen = toggle?.querySelector<HTMLElement>(".menu-icon-open");
+  const iconClose = toggle?.querySelector<HTMLElement>(".menu-icon-close");
+
+  function setMenu(open: boolean) {
+    if (!toggle || !menu) return;
+    menu.classList.toggle("hidden", !open);
+    iconOpen?.classList.toggle("hidden", open);
+    iconClose?.classList.toggle("hidden", !open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    header?.classList.toggle("rounded-full", !open);
+    header?.classList.toggle("rounded-3xl", open);
+  }
+
+  if (toggle && menu) {
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setMenu(menu.classList.contains("hidden"));
+    });
+    menu.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => setMenu(false)),
+    );
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setMenu(false);
+    });
+    document.addEventListener("click", (e) => {
+      if (
+        !menu.classList.contains("hidden") &&
+        header &&
+        !header.contains(e.target as Node)
+      ) {
+        setMenu(false);
+      }
+    });
+  }
+</script>

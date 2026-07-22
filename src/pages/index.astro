@@ -1,233 +1,624 @@
 ---
-/**
- * Home page — a static, zero-JavaScript marketing landing page.
- *
- * Uses the shared BaseLayout (which supplies SITE.defaultTitle, sitewide SEO,
- * header and footer). CTAs are plain anchors styled with buttonVariants, and
- * icons are inline SVG so nothing hydrates on the client.
- */
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { SITE } from "@/config";
 
-const features = [
-  {
-    title: "Blazing-fast static pages",
-    description:
-      "Prerendered HTML served from Cloudflare's global edge. Pages load in milliseconds, so visitors — and search engines — never wait.",
-    icon: "bolt",
-  },
-  {
-    title: "Forms that never lose a lead",
-    description:
-      "Every submission is validated, spam-filtered, and durably stored before a reply is sent. A dropped enquiry is a lost customer, and that won't happen here.",
-    icon: "shield",
-  },
-  {
-    title: "SEO built in from day one",
-    description:
-      "Clean metadata, structured data, sitemaps, and social cards ship out of the box — the technical groundwork for ranking is already done.",
-    icon: "search",
-  },
-  {
-    title: "Effortless to maintain",
-    description:
-      "Publish posts in Markdown and update your site with a single config file. No fragile plugins, no surprise bills, no server to babysit.",
-    icon: "sparkles",
-  },
+const prayerTimes = [
+  { name: "Fajr",    azan: "5:45 AM",  iqamah: "6:00",          adhan24: "05:45" },
+  { name: "Dhuhr",   azan: "1:15 PM",  iqamah: "1:30",          adhan24: "13:15" },
+  { name: "Asr",     azan: "4:30 PM",  iqamah: "4:45",          adhan24: "16:30" },
+  { name: "Maghrib", azan: "6:12 PM",  iqamah: "6:20",          adhan24: "18:12" },
+  { name: "Isha",    azan: "7:45 PM",  iqamah: "8:00",          adhan24: "19:45" },
+  { name: "Jumu'ah", azan: "1:15 PM",  iqamah: "2:15 PM (2nd)", adhan24: "13:15" },
 ];
 
-const stats = [
-  { value: "100/100", label: "Typical Lighthouse performance" },
-  { value: "0", label: "Leads lost to a broken form" },
-  { value: "< 50ms", label: "Edge response time worldwide" },
+const events = [
+  {
+    title: "Friday Khutbah",
+    time: "Fridays @ 1:15 PM",
+    category: "Weekly",
+    image: "/friday-khutbah.png",
+    description: "Join us for our weekly congregational prayer and an inspirational message from our Imam.",
+  },
+  {
+    title: "Youth Quran Class",
+    time: "Sundays @ 10:00 AM",
+    category: "Education",
+    image: "/kids-class.png",
+    description: "Nurturing the love for the Quran in our children through interactive learning and tajweed practice.",
+  },
+  {
+    title: "Community Iftar",
+    time: "Monthly Social",
+    category: "Special",
+    image: "/community-iftar.png",
+    description: "Bringing families together to share a meal, strengthen bonds, and celebrate our community.",
+  },
 ];
 ---
 
-<BaseLayout
-  description="A fast, secure, search-ready website — prerendered on Cloudflare's edge with lead capture that never drops a submission."
->
-  <!-- Hero -->
-  <section class="relative overflow-hidden">
-    <div
-      class="from-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent"
-      aria-hidden="true"
-    >
+<BaseLayout title="Loudoun Islamic Center - Home">
+
+<!-- ════════════════════════════════════════════
+     HERO (OPTION 1 - CENTERED - COMMENTED OUT)
+     To use this version, uncomment this block and comment out Option 2 below.
+════════════════════════════════════════════ -->
+{/*
+<section class="relative flex min-h-dvh flex-col justify-center overflow-hidden pt-32 pb-32 text-white">
+  <div class="absolute inset-0 z-0 bg-primary">
+    <img
+      src="/mosque-hero.png"
+      alt="Loudoun Islamic Center"
+      fetchpriority="high"
+      class="h-full w-full object-cover opacity-80 brightness-[0.85]"
+    />
+    <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-primary/95 via-primary/40 to-primary/10"></div>
+  </div>
+
+  <div class="relative z-10 mx-auto w-full max-w-[860px] px-6 text-center md:px-16">
+    <p class="hero-fade font-display text-3xl italic text-amber-400 drop-shadow-lg md:text-4xl">Assalamu Alaikum</p>
+    <h1 class="hero-fade hero-fade-1 text-display-lg md:text-display-xl font-display mt-3 mb-6 leading-tight tracking-tight text-white">
+      Empowering Our Community<br/>Through Faith and Service
+    </h1>
+    <p class="hero-fade hero-fade-2 mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85">
+      Welcome to the Loudoun Islamic Center — a spiritual home fostering growth, education, and meaningful community connection in Northern Virginia.
+    </p>
+    <div class="hero-fade hero-fade-3 flex flex-wrap justify-center gap-4">
+      <a href="/donate" class="inline-flex items-center gap-2 rounded-full bg-gold px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all hover:scale-105 hover:bg-secondary">
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Donate Now
+      </a>
+      <a href="/about" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/10">
+        About Us
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </a>
     </div>
-    <div
-      class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:py-32"
-    >
-      <div class="mx-auto max-w-3xl text-center">
-        <Badge variant="secondary" className="mb-6">
-          Built on {SITE.name}
-        </Badge>
-        <h1
-          class="text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-        >
-          A faster, safer website your business can grow on
+  </div>
+
+  <a href="#prayer-times" aria-label="Scroll to prayer times" class="absolute bottom-28 left-1/2 z-10 -translate-x-1/2 text-white/60 transition-colors hover:text-white">
+    <svg class="h-6 w-6 motion-safe:animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+  </a>
+</section>
+*/}
+
+
+<!-- ════════════════════════════════════════════
+     HERO (OPTION 2 - SPLIT LAYOUT — COMMENTED OUT)
+     To re-enable: remove the {/* and */} around this block
+════════════════════════════════════════════ -->
+{/*
+<section class="relative overflow-hidden bg-[#f8fafc] pt-40 pb-32 md:pt-48 md:pb-40">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+      
+      <!-- Left Content -->
+      <div class="hero-fade relative z-10 text-center lg:text-left">
+        <span class="mb-4 inline-block rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-gold shadow-sm backdrop-blur-sm">Assalamu Alaikum</span>
+        <h1 class="hero-fade hero-fade-1 font-display mt-2 mb-6 text-display-lg leading-tight tracking-tight text-primary md:text-5xl lg:text-6xl">
+          Empowering Our Community<br/>Through <span class="text-secondary">Faith</span> & Service
         </h1>
-        <p
-          class="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg text-pretty sm:text-xl"
-        >
-          {SITE.name} pairs edge-fast pages with rock-solid lead capture and SEO that's
-          handled for you — so you can focus on customers instead of plumbing.
+        <p class="hero-fade hero-fade-2 mx-auto mb-10 max-w-lg text-lg leading-relaxed text-gray-500 lg:mx-0">
+          Welcome to the Loudoun Islamic Center — a spiritual home fostering growth, education, and meaningful community connection in Northern Virginia.
         </p>
-        <div
-          class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-        >
-          <a href="/contact" class={buttonVariants({ size: "lg" })}>
-            Get in touch
+        <div class="hero-fade hero-fade-3 flex flex-wrap justify-center gap-4 lg:justify-start">
+          <a href="/donate" class="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:bg-secondary hover:shadow-xl">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            Donate Now
           </a>
-          <a
-            href="/blog"
-            class={buttonVariants({ variant: "ghost", size: "lg" })}
-          >
-            Read the blog
+          <a href="/about" class="inline-flex items-center gap-2 rounded-full border-2 border-primary/20 px-8 py-3.5 text-sm font-semibold text-primary transition-all hover:border-primary hover:bg-primary/5">
+            About Us
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </a>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Features / value grid -->
-  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-        Everything a small business site needs
-      </h2>
-      <p class="text-muted-foreground mt-4 text-lg text-pretty">
-        The hard parts of a modern website — speed, reliability, and
-        discoverability — come standard.
-      </p>
-    </div>
-    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {
-        features.map((feature) => (
-          <Card className="h-full">
-            <CardContent className="flex h-full flex-col">
-              <span
-                class="bg-primary/10 text-primary mb-4 inline-flex size-11 items-center justify-center rounded-lg"
-                aria-hidden="true"
-              >
-                {feature.icon === "bolt" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="size-5"
-                  >
-                    <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-                  </svg>
-                )}
-                {feature.icon === "shield" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="size-5"
-                  >
-                    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                )}
-                {feature.icon === "search" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="size-5"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                  </svg>
-                )}
-                {feature.icon === "sparkles" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="size-5"
-                  >
-                    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-                  </svg>
-                )}
-              </span>
-              <CardTitle className="text-lg">{feature.title}</CardTitle>
-              <CardDescription className="mt-2">
-                {feature.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
-        ))
-      }
-    </div>
-  </section>
+      <!-- Right Image -->
+      <div class="hero-fade hero-fade-2 relative mt-8 lg:mt-0">
+        <div class="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gold/20 blur-3xl"></div>
+        <div class="absolute -bottom-12 -left-12 h-64 w-64 rounded-full bg-primary/20 blur-3xl"></div>
+        
+        <div class="absolute -left-6 top-12 z-20 hidden md:flex items-center gap-3 rounded-2xl border border-white/50 bg-white/95 p-3 pr-6 shadow-2xl backdrop-blur-md" style="animation: float 6s ease-in-out infinite;">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold text-2xl shadow-inner">🕌</div>
+          <div>
+            <p class="font-display text-sm font-bold leading-tight text-primary">5 Daily Prayers</p>
+            <p class="text-xs text-gray-500">Congregational Worship</p>
+          </div>
+        </div>
 
-  <!-- Trust / stats strip -->
-  <section class="bg-muted/40 border-y">
-    <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-      <dl class="grid grid-cols-1 gap-8 text-center sm:grid-cols-3">
-        {
-          stats.map((stat) => (
-            <div class="flex flex-col items-center">
-              <dt class="text-4xl font-bold tracking-tight sm:text-5xl">
-                {stat.value}
-              </dt>
-              <dd class="text-muted-foreground mt-2 text-sm text-pretty">
-                {stat.label}
-              </dd>
-            </div>
-          ))
-        }
-      </dl>
+        <div class="absolute -right-6 bottom-16 z-20 hidden md:flex items-center gap-3 rounded-2xl border border-white/50 bg-white/95 p-3 pr-6 shadow-2xl backdrop-blur-md" style="animation: float 6s ease-in-out 3s infinite;">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-2xl shadow-inner">📚</div>
+          <div>
+            <p class="font-display text-sm font-bold leading-tight text-primary">Youth Education</p>
+            <p class="text-xs text-gray-500">Nurturing the Future</p>
+          </div>
+        </div>
+        
+        <div class="group relative overflow-hidden rounded-3xl border-[4px] border-white shadow-2xl transition-transform duration-700 hover:-translate-y-2 hover:shadow-3xl">
+          <img src="/mosque-hero.png" alt="Loudoun Islamic Center" fetchpriority="high" class="h-[400px] w-full object-cover transition-transform duration-1000 group-hover:scale-110 md:h-[600px]"/>
+          <div class="pointer-events-none absolute inset-0 bg-linear-to-tr from-primary/40 to-transparent"></div>
+        </div>
+      </div>
+      
     </div>
-  </section>
+  </div>
+</section>
+*/}
 
-  <!-- Final CTA band -->
-  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-    <div
-      class="bg-primary text-primary-foreground relative overflow-hidden rounded-2xl px-6 py-14 text-center sm:px-12"
+
+<!-- ════════════════════════════════════════════
+     HERO (OPTION 3 — VIDEO BACKGROUND) ← ACTIVE
+     Video file: /public/din.mp4
+     To switch back to Option 2: wrap this in {/* */} and remove {/* */} from Option 2 above.
+════════════════════════════════════════════ -->
+<section class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden text-white" style="min-height: 100svh;">
+
+  <!-- ── Video background ── -->
+  <div class="absolute inset-0 z-0 bg-[#0A2B1D]">
+    <video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      class="h-full w-full object-cover"
+      style="filter: brightness(0.55);"
+      aria-hidden="true"
     >
-      <h2 class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        Ready to put your business online — properly?
-      </h2>
-      <p
-        class="text-primary-foreground/80 mx-auto mt-4 max-w-xl text-lg text-pretty"
+      <source src="/loudoun-islamic-center-hero-bg.mp4" type="video/mp4" />
+      <!-- Fallback image if video can't load -->
+      <img src="/mosque-hero.png" alt="Loudoun Islamic Center" class="h-full w-full object-cover"/>
+    </video>
+    <!-- Dark gradient overlay from bottom for text readability -->
+    <div class="pointer-events-none absolute inset-0" style="background: linear-gradient(to top, rgba(10,43,29,0.90) 0%, rgba(10,43,29,0.35) 55%, rgba(10,43,29,0.10) 100%);"></div>
+  </div>
+
+  <!-- ── Overlay text content ── -->
+  <div class="relative z-10 mx-auto w-full max-w-[900px] px-6 text-center md:px-16">
+
+    <!-- Logo above the text -->
+    <div class="hero-fade mb-8 flex justify-center">
+      <div class="inline-block rounded-3xl bg-white/95 p-5 shadow-[0_0_40px_rgba(255,255,255,0.3)] backdrop-blur-md transition-transform hover:scale-105">
+        <img
+          src="/logo_header.png"
+          alt="Loudoun Islamic Center"
+          class="h-28 w-auto object-contain md:h-36"
+        />
+      </div>
+    </div>
+
+    <!-- Arabic-style greeting -->
+    <p class="hero-fade mb-3 font-display text-2xl italic text-amber-400 drop-shadow-lg md:text-3xl" style="text-shadow: 0 2px 16px rgba(0,0,0,0.6);">
+      Assalamu Alaikum
+    </p>
+
+    <!-- Main heading -->
+    <h1 class="hero-fade hero-fade-1 font-display mb-6 text-4xl font-bold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl" style="text-shadow: 0 4px 24px rgba(0,0,0,0.5);">
+      Welcome to<br/>Loudoun Islamic Center
+    </h1>
+
+    <!-- Subtext from real website -->
+    <p class="hero-fade hero-fade-2 mx-auto mb-10 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg" style="text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+      Please register and become a member of our community.<br class="hidden md:block"/>
+      Once registered, you will receive notifications and updates<br class="hidden md:block"/>
+      on events being held at the center.
+    </p>
+
+    <!-- CTA buttons -->
+    <div class="hero-fade hero-fade-3 flex flex-wrap items-center justify-center gap-4">
+      <a
+        href="/contact"
+        class="inline-flex items-center gap-2 rounded-full bg-gold px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:scale-105 hover:bg-amber-600"
       >
-        Tell us what you're building. We'll help you launch a site that's fast,
-        secure, and ready to win customers.
-      </p>
-      <div class="mt-8">
-        <a
-          href="/contact"
-          class={buttonVariants({ variant: "secondary", size: "lg" })}
-        >
-          Start the conversation
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Join Our Community
+      </a>
+      <a
+        href="/donate"
+        class="inline-flex items-center gap-2 rounded-full border-2 border-white/50 px-8 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/10"
+      >
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Donate Now
+      </a>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <a href="#prayer-times" aria-label="Scroll to prayer times" class="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 text-white/60 transition-colors hover:text-white">
+    <svg class="h-6 w-6 motion-safe:animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+  </a>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     PRAYER TIMES — with live ET clock & countdown
+════════════════════════════════════════════ -->
+<section id="prayer-times" class="relative z-20 mx-auto -mt-22 mb-20 max-w-[1400px] scroll-mt-28 px-4 md:px-8">
+  <div class="overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+    <!-- Top bar -->
+    <div class="flex flex-col items-center justify-between gap-4 border-b-4 border-gold bg-primary px-6 py-4 md:flex-row">
+      <div class="flex flex-wrap items-center gap-6">
+        <div class="flex items-center gap-2">
+          <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="font-display text-lg font-bold text-white">Daily Prayer Times</span>
+        </div>
+        <!-- Live ET clock -->
+        <div class="flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-xs text-white/70">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="et-clock">Loading...</span>
+          <span class="text-white/40">Eastern Time</span>
+        </div>
+        <!-- Next prayer countdown -->
+        <div class="flex items-center gap-2 rounded bg-secondary px-3 py-1 text-xs font-bold tracking-widest text-white">
+          <span class="h-2 w-2 animate-pulse rounded-full bg-white"></span>
+          NEXT: <span id="next-prayer-name">—</span> in <span id="next-prayer-countdown" class="ml-1 font-mono">—:——:——</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="et-date" class="text-sm font-medium text-white/80"></span>
+        <a href="#" class="flex items-center gap-2 rounded border border-white/20 px-4 py-2 text-xs text-white transition hover:bg-white/10">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Download PDF
         </a>
       </div>
     </div>
-  </section>
+
+    <!-- Times grid -->
+    <div class="grid grid-cols-2 divide-x divide-y divide-gray-100 bg-white md:grid-cols-6 md:divide-y-0">
+      {prayerTimes.map((t) => (
+        <div class="prayer-cell relative p-5 text-center" data-adhan={t.adhan24}>
+          <div class="prayer-highlight-bar absolute top-0 left-0 right-0 hidden h-1 bg-secondary"></div>
+          <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{t.name}</p>
+          <p class="mb-1 text-2xl font-bold text-primary">{t.azan}</p>
+          <p class="text-xs text-gray-500">Iqamah: {t.iqamah}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     ABOUT (white bg) — real content
+════════════════════════════════════════════ -->
+<section class="overflow-hidden bg-white py-24">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="grid items-center gap-16 md:grid-cols-2">
+      <div class="group reveal relative order-2 md:order-1 p-8">
+        <!-- Animated corner decorations -->
+        <!-- Top-left corner bracket -->
+        <div class="absolute top-0 left-0 h-16 w-16 border-t-4 border-l-4 rounded-tl-2xl transition-all duration-700 group-hover:h-24 group-hover:w-24" style="border-color: #C27121;"></div>
+        <!-- Top-right corner dot cluster -->
+        <div class="absolute top-2 right-2 flex gap-1.5" style="animation: float 4s ease-in-out infinite;">
+          <span class="h-2.5 w-2.5 rounded-full bg-gold opacity-70"></span>
+          <span class="h-2.5 w-2.5 rounded-full opacity-50" style="background:#0A2B1D;"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-gold opacity-30"></span>
+        </div>
+        <!-- Bottom-right corner bracket -->
+        <div class="absolute bottom-0 right-0 h-16 w-16 border-b-4 border-r-4 rounded-br-2xl transition-all duration-700 group-hover:h-24 group-hover:w-24" style="border-color: #0A2B1D;"></div>
+        <!-- Bottom-left floating badge -->
+        <div class="absolute -bottom-4 -left-4 z-20 flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-white shadow-xl" style="animation: float 5s ease-in-out 1s infinite;">
+          <span class="text-xl">🕌</span>
+          <div>
+            <p class="text-xs font-bold text-gold uppercase tracking-wider">Since 2004</p>
+            <p class="text-xs text-white/70">Serving Loudoun County</p>
+          </div>
+        </div>
+        <!-- Subtle rotating ring behind image -->
+        <div class="absolute inset-6 rounded-2xl border border-gold/20" style="animation: float 8s ease-in-out 0.5s infinite;"></div>
+
+        <img
+          src="/About_real_image.png"
+          alt="Loudoun Islamic Center community"
+          loading="lazy"
+          decoding="async"
+          class="relative z-10 h-[420px] w-full rounded-2xl object-cover shadow-2xl transition-all duration-500 group-hover:shadow-primary/20 md:h-[540px]"
+          style="box-shadow: 0 25px 60px rgba(10,43,29,0.2);"
+        />
+      </div>
+      <div class="reveal order-1 md:order-2">
+        <span class="mb-5 inline-block rounded-full border border-green-300 bg-green-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">About Us</span>
+        <h2 class="text-display-md font-display mb-8 leading-tight text-primary">About <span class="text-secondary">Loudoun Islamic Center</span></h2>
+        <div class="space-y-5 text-lg leading-relaxed text-gray-500">
+          <p>Loudoun Islamic Center is a diverse, non-sectarian, multi-ethnic, broad-minded community, with non-discriminatory policies and practices that encourage equal participation and involvement of men and women who are members of LIC and endorse its rules, regulations, and procedures, by virtue of their membership.</p>
+        </div>
+        <a href="/about" class="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-secondary">
+          Read More
+          <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     GALLERY — 7 real images
+════════════════════════════════════════════ -->
+<section class="bg-[#f8fafc] py-24">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="reveal mb-14 text-center">
+      <span class="mb-3 block text-xs font-bold uppercase tracking-widest text-gold">Life at LIC</span>
+      <h2 class="text-display-md font-display mb-3 text-primary">Our Vibrant Community</h2>
+      <p class="mx-auto max-w-xl text-lg text-gray-500">Experience the daily life, brotherhood, and spiritual moments that define our center.</p>
+    </div>
+
+      <!-- 7 real images in a masonry-style grid -->
+      <div class="reveal grid gap-3" style="grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 280px 280px;">
+
+        <!-- Image 1 — large, spans 2 rows on left (Now showing image 6) -->
+        <div class="group relative row-span-2 cursor-pointer overflow-hidden rounded-2xl" style="grid-row: 1 / span 2;">
+          <img src="/gallery_image6_real.jpeg" alt="Friday Khutbah" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+          <div class="absolute inset-0 bg-linear-to-t from-primary/85 to-transparent to-50%"></div>
+          <div class="absolute bottom-0 left-0 p-5">
+            <p class="font-display text-lg font-bold text-white">Friday Khutbah</p>
+            <p class="mt-1 text-sm text-white/70">Weekly congregational prayer.</p>
+          </div>
+          <div class="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
+              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image 2 top center -->
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image2_real.jpeg" alt="Prayer Hall" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+
+        <!-- Image 3 top right -->
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image3_real.jpeg" alt="Youth Class" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+
+        <!-- Image 4 bottom center -->
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image4_real.jpeg" alt="Community Iftar" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+
+        <!-- Image 5 bottom right -->
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image5_real.jpeg" alt="Quran Studies" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+
+      </div>
+
+      <!-- Second row: images 6 & 7 side by side wide (Now showing image 1 instead of 6) -->
+      <div class="reveal mt-3 grid grid-cols-2 gap-3" style="height: 220px;">
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image1_real.jpeg" alt="Community Gathering" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+        <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
+          <img src="/gallery_image7_real.jpeg" alt="Special Events" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+        </div>
+      </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     EVENTS (white bg)
+════════════════════════════════════════════ -->
+<section class="bg-white py-24">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="reveal mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-secondary">Mark Your Calendar</span>
+        <h2 class="text-display-md font-display text-primary">Upcoming Events</h2>
+      </div>
+      <a href="/events" class="flex items-center gap-2 text-sm font-semibold text-gray-500 transition-colors hover:text-primary">
+        View All Events
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </a>
+    </div>
+
+    <div class="reveal grid gap-8 md:grid-cols-3">
+      {events.map((event) => (
+        <div class="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_2px_12px_rgba(10,43,29,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div class="relative h-56 overflow-hidden">
+            <span class="absolute top-4 left-4 z-10 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-white">{event.category}</span>
+            <img src={event.image} alt={event.title} loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+          </div>
+          <div class="flex flex-1 flex-col p-6">
+            <div class="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <svg class="h-3.5 w-3.5 shrink-0 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              {event.time}
+            </div>
+            <h3 class="font-display mb-3 text-xl font-bold text-primary">{event.title}</h3>
+            <p class="mb-6 flex-1 text-sm leading-relaxed text-gray-500">{event.description}</p>
+            <a href="#" class="w-full rounded-xl border border-primary py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white">Learn More</a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     FAQ — light green bg
+════════════════════════════════════════════ -->
+<section class="bg-green-50 py-24">
+  <div class="mx-auto max-w-3xl px-6 md:px-16">
+    <div class="reveal mb-14 text-center">
+      <span class="mb-3 block text-xs font-bold uppercase tracking-widest text-primary">Help Center</span>
+      <h2 class="text-display-md font-display mb-4 text-primary">Common <span class="text-secondary">Questions</span></h2>
+      <p class="mx-auto max-w-md text-gray-500">Find quick answers about visiting, volunteering, and engaging with our center.</p>
+    </div>
+
+    <div class="reveal space-y-3" id="faq-list">
+      {[
+        { q: "What are the center's opening hours?",   a: "LIC is open daily from 20 minutes before Fajr prayer until 30 minutes after Isha prayer. The office is open Monday–Friday from 10 AM to 6 PM." },
+        { q: "How can I volunteer?",                   a: "We are always looking for community members to help. Sign up via our 'Volunteer' page or contact the office directly at info@loudounislamiccenter.org." },
+        { q: "Are there classes for children?",        a: "Yes! We have a robust youth education program including Sunday school, Quranic studies, and youth social clubs for ages 5–18." },
+        { q: "How can non-Muslims visit the center?",  a: "We warmly welcome interfaith visitors. Please contact us ahead of time to arrange a guided tour and meet with our community liaison." },
+      ].map((item, i) => (
+        <div class="faq-item group cursor-pointer overflow-hidden rounded-2xl border border-green-200 bg-white shadow-[0_2px_8px_rgba(10,43,29,0.05)]" data-faq={i}>
+          <button type="button" aria-expanded="false" class="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors group-hover:bg-green-50/50">
+            <span class="font-display text-lg font-semibold text-primary">{item.q}</span>
+            <span class="faq-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 text-primary transition-all duration-300">
+              <svg class="h-4 w-4 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </span>
+          </button>
+          <div class="faq-answer hidden px-6 pb-6 leading-relaxed text-gray-500">{item.a}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     SUPPORT / DONATE — white bg
+════════════════════════════════════════════ -->
+<section class="border-t border-gray-100 bg-white py-24">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="reveal mb-16 text-center">
+      <span class="mb-3 block text-xs font-bold uppercase tracking-widest text-gold">Giving</span>
+      <h2 class="text-display-md font-display mb-4 text-primary">Support Our <span class="text-gold">Mission</span></h2>
+      <p class="mx-auto max-w-xl text-gray-500">Every contribution — big or small — is a sadaqah that builds a stronger community for generations to come.</p>
+    </div>
+
+    <div class="reveal grid gap-8 md:grid-cols-2">
+      <!-- Card 1 -->
+      <div class="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 md:flex-row">
+        <div class="min-h-[220px] w-full overflow-hidden md:w-2/5">
+          <img src="/support_real1_image.png" alt="Mosque Operations" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+        </div>
+        <div class="flex w-full flex-col justify-center p-8 md:w-3/5">
+          <span class="mb-3 text-xs font-bold uppercase tracking-widest text-gold">General Fund</span>
+          <h3 class="font-display mb-4 text-2xl font-bold text-primary">LIC Operations</h3>
+          <p class="mb-6 text-sm leading-relaxed text-gray-500">
+            Fund our daily spiritual programs, facility maintenance, and educational activities that serve thousands of families.
+          </p>
+          <a href="#" class="w-full rounded-xl bg-gold py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-secondary">Donate Now — Sadaqah</a>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 md:flex-row">
+        <div class="min-h-[220px] w-full overflow-hidden md:w-2/5">
+          <img src="/support_real2_image.png" alt="Build Our Future" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+        </div>
+        <div class="flex w-full flex-col justify-center p-8 md:w-3/5">
+          <span class="mb-3 text-xs font-bold uppercase tracking-widest text-green-600">Waqf Fund</span>
+          <h3 class="font-display mb-4 text-2xl font-bold text-primary">Build Our Future</h3>
+          <p class="mb-6 text-sm leading-relaxed text-gray-500">
+            Invest in a permanent legacy. Help us expand and build a state-of-the-art facility for generations to come.
+          </p>
+          <a href="#" class="w-full rounded-xl border border-primary py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white">Donate Now — Sadaqah Jariyah</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </BaseLayout>
+
+<!-- ════════════════════════════════════════════
+     CLIENT SCRIPTS — Prayer Timer + FAQ Accordion + Scroll Reveal
+════════════════════════════════════════════ -->
+<script>
+// ── Eastern Time clock & prayer countdown ─────────────────────────
+const PRAYERS_ET = [
+  { name: "Fajr",    h: 5,  m: 45 },
+  { name: "Dhuhr",   h: 13, m: 15 },
+  { name: "Asr",     h: 16, m: 30 },
+  { name: "Maghrib", h: 18, m: 12 },
+  { name: "Isha",    h: 19, m: 45 },
+];
+
+function getNowET() {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+}
+
+function pad(n: number) { return String(n).padStart(2, "0"); }
+
+function tick() {
+  const now = getNowET();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+
+  // Clock display
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  const clockEl = document.getElementById("et-clock");
+  if (clockEl) clockEl.textContent = `${h12}:${pad(m)}:${pad(s)} ${ampm}`;
+
+  // Date display
+  const dateEl = document.getElementById("et-date");
+  if (dateEl) dateEl.textContent = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+  // Next prayer countdown
+  const totalMins = h * 60 + m;
+  let nextPrayer = PRAYERS_ET.find(p => p.h * 60 + p.m > totalMins) || PRAYERS_ET[0];
+  let nextMins = nextPrayer.h * 60 + nextPrayer.m;
+  if (nextMins <= totalMins) nextMins += 24 * 60; // tomorrow Fajr
+  const diffSec = (nextMins - totalMins) * 60 - s;
+  const rh = Math.floor(diffSec / 3600);
+  const rm = Math.floor((diffSec % 3600) / 60);
+  const rs = diffSec % 60;
+
+  const nameEl = document.getElementById("next-prayer-name");
+  const countEl = document.getElementById("next-prayer-countdown");
+  if (nameEl) nameEl.textContent = nextPrayer.name;
+  if (countEl) countEl.textContent = `${pad(rh)}:${pad(rm)}:${pad(rs)}`;
+
+  // Highlight the next upcoming prayer's cell
+  const nextMinOfDay = nextPrayer.h * 60 + nextPrayer.m;
+  document.querySelectorAll<HTMLElement>(".prayer-cell").forEach(cell => {
+    const adhan = cell.getAttribute("data-adhan");
+    const bar = cell.querySelector(".prayer-highlight-bar");
+    if (!adhan) return;
+    const [ah, am] = adhan.split(":").map(Number);
+    const isNext = ah * 60 + am === nextMinOfDay;
+    cell.style.background = isNext ? "#f0fdf4" : "";
+    if (bar) bar.classList.toggle("hidden", !isNext);
+  });
+}
+
+setInterval(tick, 1000);
+tick();
+
+// ── FAQ pure-JS accordion ─────────────────────────────────────────
+document.querySelectorAll(".faq-item").forEach(item => {
+  item.addEventListener("click", () => {
+    const answer = item.querySelector(".faq-answer");
+    const icon = item.querySelector<HTMLElement>(".faq-icon svg");
+    const iconWrap = item.querySelector<HTMLElement>(".faq-icon");
+    const button = item.querySelector("button");
+    if (!answer) return;
+    const isOpen = !answer.classList.contains("hidden");
+    // Close all
+    document.querySelectorAll(".faq-answer").forEach(a => a.classList.add("hidden"));
+    document.querySelectorAll<HTMLElement>(".faq-icon svg").forEach(i => { i.style.transform = "rotate(0deg)"; i.style.color = ""; });
+    document.querySelectorAll<HTMLElement>(".faq-icon").forEach(i => (i.style.background = ""));
+    document.querySelectorAll(".faq-item button").forEach(b => b.setAttribute("aria-expanded", "false"));
+    // Open clicked
+    if (!isOpen) {
+      answer.classList.remove("hidden");
+      if (icon) { icon.style.transform = "rotate(180deg)"; icon.style.color = "white"; }
+      if (iconWrap) iconWrap.style.background = "#0A2B1D";
+      if (button) button.setAttribute("aria-expanded", "true");
+    }
+  });
+});
+
+// ── Scroll reveal (respects prefers-reduced-motion) ───────────────
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  document.documentElement.classList.add("js-reveal");
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12 },
+  );
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+}
+</script>
