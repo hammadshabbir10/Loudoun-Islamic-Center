@@ -46,20 +46,26 @@ export interface SiteConfig {
 }
 
 export const SITE: SiteConfig = {
-  url: "https://example.com",
-  name: "Zikra Starter Site",
+  url: "https://www.loudounislamiccenter.org",
+  name: "Loudoun Islamic Center",
   description:
-    "A fast, secure website built on the Zikra platform — Astro, Cloudflare, and a lead pipeline that never drops a submission.",
-  defaultTitle: "Zikra Starter Site — Fast, secure websites on Cloudflare",
-  defaultAuthor: "Zikra Team",
+    "Loudoun Islamic Center (LIC) is a masjid in Leesburg, VA serving the Muslim community of Loudoun County with daily prayers, Jumu'ah, youth education, and community programs.",
+  defaultTitle: "Loudoun Islamic Center — Masjid in Leesburg, VA",
+  defaultAuthor: "Loudoun Islamic Center",
   defaultOgImage: "/og-default.png",
   gaMeasurementId: "",
-  adminEmail: "[email protected]",
-  emailFromName: "Zikra Starter Site",
+  adminEmail: "info@loudounislamiccenter.org",
+  emailFromName: "Loudoun Islamic Center",
   z360Enabled: false,
   z360InquiriesUrl: "https://api.z360.example/v1/inquiries",
-  telephone: undefined,
-  address: undefined,
+  telephone: "+1-877-331-5005",
+  address: {
+    streetAddress: "1507 Dodona Terrace SE, Suite 210",
+    addressLocality: "Leesburg",
+    addressRegion: "VA",
+    postalCode: "20175",
+    addressCountry: "US",
+  },
 };
 
 /**

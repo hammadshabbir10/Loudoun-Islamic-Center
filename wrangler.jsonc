@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "zikra-astro-starter",
+  "name": "loudoun-islamic-center",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-07-14",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -19,19 +19,16 @@
 
   // Required Worker Secrets. Wrangler validates these on deploy and includes
   // them in generated binding types without reading local .dev.vars.
-  "secrets": {
-    "required": ["TURNSTILE_SECRET", "PLUNK_API_KEY"],
-  },
+  // TEMPORARILY DISABLED until R2 + email keys are set up on this account —
+  // restore this block (and the r2_buckets block below) once R2 is enabled:
+  //   "secrets": { "required": ["TURNSTILE_SECRET", "PLUNK_API_KEY"] },
 
   // R2 bucket for the "never lose a lead" backup (see src/actions & AGENTS.md).
-  // Rename `bucket_name` per site, then create it once:
-  //   wrangler r2 bucket create <bucket_name>
-  "r2_buckets": [
-    {
-      "binding": "LEADS_BUCKET",
-      "bucket_name": "zikra-leads",
-    },
-  ],
+  // TEMPORARILY DISABLED — R2 is not enabled on this Cloudflare account yet.
+  // Once enabled, run `wrangler r2 bucket create lic-leads` and restore:
+  //   "r2_buckets": [
+  //     { "binding": "LEADS_BUCKET", "bucket_name": "lic-leads" },
+  //   ],
 
   // Secret values are NEVER listed here. Local dev reads values from .dev.vars;
   // production uses Worker Secrets:
