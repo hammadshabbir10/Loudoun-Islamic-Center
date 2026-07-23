@@ -2,12 +2,12 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const prayerTimes = [
-  { name: "Fajr",    azan: "5:45 AM",  iqamah: "6:00",          adhan24: "05:45" },
-  { name: "Dhuhr",   azan: "1:15 PM",  iqamah: "1:30",          adhan24: "13:15" },
-  { name: "Asr",     azan: "4:30 PM",  iqamah: "4:45",          adhan24: "16:30" },
-  { name: "Maghrib", azan: "6:12 PM",  iqamah: "6:20",          adhan24: "18:12" },
-  { name: "Isha",    azan: "7:45 PM",  iqamah: "8:00",          adhan24: "19:45" },
-  { name: "Jumu'ah", azan: "1:15 PM",  iqamah: "2:15 PM (2nd)", adhan24: "13:15" },
+  { name: "Fajr",    azan: "5:45 AM",  iqamah: "6:00",          adhan24: "05:45", icon: "M12 3v3m6.4.6l-2.1 2.1M6.6 6.6l2.1 2.1M4 20h16M7 16a5 5 0 0110 0" },
+  { name: "Dhuhr",   azan: "1:15 PM",  iqamah: "1:30",          adhan24: "13:15", icon: "M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m0-12.14l1.41 1.41m11.32 11.32l1.41 1.41M12 8a4 4 0 100 8 4 4 0 000-8z" },
+  { name: "Asr",     azan: "4:30 PM",  iqamah: "4:45",          adhan24: "16:30", icon: "M4 20h16M6 16a6 6 0 1112 0M12 4v2m8.49 3.51l-1.41 1.41M4.92 10.92L3.51 9.51" },
+  { name: "Maghrib", azan: "6:12 PM",  iqamah: "6:20",          adhan24: "18:12", icon: "M4 20h16M7 16a5 5 0 0110 0M12 3v6m0 0l3-3m-3 3L9 6" },
+  { name: "Isha",    azan: "7:45 PM",  iqamah: "8:00",          adhan24: "19:45", icon: "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" },
+  { name: "Jumu'ah", azan: "1:15 PM",  iqamah: "2:15 PM (2nd)", adhan24: "13:15", icon: "M12 3l1.9 5.8h6.1l-4.95 3.6 1.9 5.8L12 14.6l-4.95 3.6 1.9-5.8L4 8.8h6.1L12 3z" },
 ];
 
 const events = [
@@ -228,50 +228,69 @@ const events = [
 
 
 <!-- ════════════════════════════════════════════
-     PRAYER TIMES — with live ET clock & countdown
+     PRAYER TIMES — full section, big live clock & countdown
 ════════════════════════════════════════════ -->
-<section id="prayer-times" class="relative z-20 mx-auto -mt-22 mb-20 max-w-[1400px] scroll-mt-28 px-4 md:px-8">
-  <div class="overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
-    <!-- Top bar -->
-    <div class="flex flex-col items-center justify-between gap-4 border-b-4 border-gold bg-primary px-6 py-4 md:flex-row">
-      <div class="flex flex-wrap items-center gap-6">
-        <div class="flex items-center gap-2">
-          <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <span class="font-display text-lg font-bold text-white">Daily Prayer Times</span>
+<section id="prayer-times" class="relative z-20 mx-auto my-14 max-w-[1400px] scroll-mt-28 px-4 md:my-20 md:px-8">
+  <div class="reveal overflow-hidden rounded-3xl border border-outline-variant bg-white shadow-2xl">
+
+    <!-- Dark header: title + BIG clock + BIG countdown -->
+    <div class="relative overflow-hidden border-b-4 border-gold bg-primary px-6 py-8 md:px-10 md:py-10">
+      <!-- Ambient glows -->
+      <div class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gold/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl"></div>
+      <div class="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5"></div>
+
+      <div class="relative z-10 grid items-center gap-8 text-center lg:grid-cols-3 lg:text-left">
+
+        <!-- Title + date + PDF -->
+        <div>
+          <div class="flex items-center justify-center gap-2.5 lg:justify-start">
+            <svg class="h-6 w-6 shrink-0 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h2 class="font-display text-2xl font-bold text-white md:text-3xl">Daily Prayer Times</h2>
+          </div>
+          <p id="et-date" class="mt-2 text-base font-medium text-white/80 md:text-lg"></p>
+          <a href="#" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Download PDF
+          </a>
         </div>
-        <!-- Live ET clock -->
-        <div class="flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-xs text-white/70">
-          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span id="et-clock">Loading...</span>
-          <span class="text-white/40">Eastern Time</span>
+
+        <!-- BIG live clock -->
+        <div class="text-center">
+          <p class="text-xs font-bold uppercase tracking-[0.3em] text-gold">Current Time — Eastern</p>
+          <p class="mt-2 flex items-baseline justify-center gap-2 whitespace-nowrap">
+            <span id="et-clock" class="font-mono text-5xl font-bold tracking-tight text-white tabular-nums [text-shadow:0_0_40px_rgba(251,191,36,0.3)] md:text-6xl xl:text-7xl">--:--:--</span>
+            <span id="et-ampm" class="font-mono text-2xl font-bold text-gold md:text-3xl">--</span>
+          </p>
         </div>
-        <!-- Next prayer countdown -->
-        <div class="flex items-center gap-2 rounded bg-secondary px-3 py-1 text-xs font-bold tracking-widest text-white">
-          <span class="h-2 w-2 animate-pulse rounded-full bg-white"></span>
-          NEXT: <span id="next-prayer-name">—</span> in <span id="next-prayer-countdown" class="ml-1 font-mono">—:——:——</span>
+
+        <!-- BIG countdown -->
+        <div class="flex justify-center lg:justify-end">
+          <div class="card-shine w-full max-w-sm rounded-2xl bg-linear-to-br from-gold to-secondary px-8 py-6 text-center shadow-lg shadow-black/20">
+            <p class="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-white/90">
+              <span class="h-2 w-2 animate-pulse rounded-full bg-white"></span>
+              Next Prayer: <span id="next-prayer-name">—</span>
+            </p>
+            <p id="next-prayer-countdown" class="mt-2 font-mono text-4xl font-bold text-white tabular-nums md:text-5xl">--:--:--</p>
+            <p class="mt-1 text-[11px] font-semibold uppercase tracking-widest text-white/70">Hours : Minutes : Seconds</p>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <span id="et-date" class="text-sm font-medium text-white/80"></span>
-        <a href="#" class="flex items-center gap-2 rounded border border-white/20 px-4 py-2 text-xs text-white transition hover:bg-white/10">
-          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          Download PDF
-        </a>
       </div>
     </div>
 
-    <!-- Times grid -->
-    <div class="grid grid-cols-2 divide-x divide-y divide-gray-100 bg-white md:grid-cols-6 md:divide-y-0">
+    <!-- Times grid — bigger cells, icons, staggered reveal -->
+    <div class="reveal-stagger grid grid-cols-2 divide-x divide-y divide-gray-100 bg-white md:grid-cols-3 lg:grid-cols-6 lg:divide-y-0">
       {prayerTimes.map((t) => (
-        <div class="prayer-cell relative p-5 text-center" data-adhan={t.adhan24}>
-          <div class="prayer-highlight-bar absolute top-0 left-0 right-0 hidden h-1 bg-secondary"></div>
-          <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{t.name}</p>
-          <p class="mb-1 text-2xl font-bold text-primary">{t.azan}</p>
-          <p class="text-xs text-gray-500">Iqamah: {t.iqamah}</p>
+        <div class="prayer-cell group relative px-4 py-8 text-center transition-colors duration-300 hover:bg-green-50/70" data-adhan={t.adhan24} data-name={t.name}>
+          <div class="prayer-highlight-bar absolute top-0 left-0 right-0 hidden h-1.5 bg-secondary"></div>
+          <svg class="mx-auto mb-3 h-6 w-6 text-gold transition-transform duration-300 group-hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d={t.icon}/></svg>
+          <p class="mb-3 text-sm font-bold uppercase tracking-widest text-gray-500">{t.name}</p>
+          <p class="mb-2 text-3xl font-bold text-primary">{t.azan}</p>
+          <p class="text-sm text-gray-500">Iqamah: {t.iqamah}</p>
         </div>
       ))}
     </div>
@@ -334,6 +353,70 @@ const events = [
 
 
 <!-- ════════════════════════════════════════════
+     SERVICES — compact overview (full page lives at /services)
+════════════════════════════════════════════ -->
+<section class="border-t border-gray-100 bg-white py-20">
+  <div class="mx-auto max-w-[1400px] px-6 md:px-16">
+    <div class="reveal mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <span class="mb-2 block text-xs font-bold uppercase tracking-widest text-gold">What We Offer</span>
+        <h2 class="text-display-md font-display text-primary">Our <span class="text-secondary">Services</span></h2>
+      </div>
+      <a href="/services" class="flex items-center gap-2 text-sm font-semibold text-gray-500 transition-colors hover:text-primary">
+        View All Services
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </a>
+    </div>
+
+    <div class="reveal-stagger grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {[
+        {
+          title: "Daily Prayers & Jumu'ah",
+          desc: "Five daily congregational prayers and the weekly Friday Khutbah, open to all.",
+          icon: "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
+        },
+        {
+          title: "Quran & Youth Education",
+          desc: "Sunday school, tajweed, and Quran memorization programs for children and adults.",
+          icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+        },
+        {
+          title: "Community Iftar & Events",
+          desc: "Monthly gatherings, Ramadan iftars, and Eid celebrations that bring families together.",
+          icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+        },
+        {
+          title: "Nikah Services",
+          desc: "Islamic marriage ceremonies officiated by our Imam, with guidance and documentation.",
+          icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+        },
+        {
+          title: "Janazah Services",
+          desc: "Funeral prayer, burial arrangements, and compassionate support for grieving families.",
+          icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+        },
+        {
+          title: "Zakat & Sadaqah",
+          desc: "Collection and distribution of zakat and sadaqah to those in need in our community.",
+          icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 9v1m9-4a9 9 0 11-18 0 9 9 0 0118 0z",
+        },
+      ].map((s) => (
+        <a href="/services" class="group flex items-start gap-4 rounded-2xl border border-gray-100 bg-[#f8fafc] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-200 hover:bg-white hover:shadow-xl">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-md transition-colors duration-300 group-hover:bg-secondary">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d={s.icon}/></svg>
+          </span>
+          <span>
+            <h3 class="font-display text-lg font-bold text-primary">{s.title}</h3>
+            <p class="mt-1.5 text-sm leading-relaxed text-gray-500">{s.desc}</p>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
      GALLERY — 7 real images
 ════════════════════════════════════════════ -->
 <section class="bg-[#f8fafc] py-24">
@@ -345,7 +428,7 @@ const events = [
     </div>
 
       <!-- 7 real images in a masonry-style grid -->
-      <div class="reveal grid gap-3" style="grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 280px 280px;">
+      <div class="reveal-stagger grid gap-3" style="grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 280px 280px;">
 
         <!-- Image 1 — large, spans 2 rows on left (Now showing image 6) -->
         <div class="group relative row-span-2 cursor-pointer overflow-hidden rounded-2xl" style="grid-row: 1 / span 2;">
@@ -385,7 +468,7 @@ const events = [
       </div>
 
       <!-- Second row: images 6 & 7 side by side wide (Now showing image 1 instead of 6) -->
-      <div class="reveal mt-3 grid grid-cols-2 gap-3" style="height: 220px;">
+      <div class="reveal-stagger mt-3 grid grid-cols-2 gap-3" style="height: 220px;">
         <div class="group relative cursor-pointer overflow-hidden rounded-2xl">
           <img src="/gallery_image1_real.jpeg" alt="Community Gathering" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
         </div>
@@ -414,7 +497,7 @@ const events = [
       </a>
     </div>
 
-    <div class="reveal grid gap-8 md:grid-cols-3">
+    <div class="reveal-stagger grid gap-8 md:grid-cols-3">
       {events.map((event) => (
         <div class="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_2px_12px_rgba(10,43,29,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
           <div class="relative h-56 overflow-hidden">
@@ -448,7 +531,7 @@ const events = [
       <p class="mx-auto max-w-md text-gray-500">Find quick answers about visiting, volunteering, and engaging with our center.</p>
     </div>
 
-    <div class="reveal space-y-3" id="faq-list">
+    <div class="reveal-stagger space-y-3" id="faq-list">
       {[
         { q: "What are the center's opening hours?",   a: "LIC is open daily from 20 minutes before Fajr prayer until 30 minutes after Isha prayer. The office is open Monday–Friday from 10 AM to 6 PM." },
         { q: "How can I volunteer?",                   a: "We are always looking for community members to help. Sign up via our 'Volunteer' page or contact the office directly at info@loudounislamiccenter.org." },
@@ -481,7 +564,7 @@ const events = [
       <p class="mx-auto max-w-xl text-gray-500">Every contribution — big or small — is a sadaqah that builds a stronger community for generations to come.</p>
     </div>
 
-    <div class="reveal grid gap-8 md:grid-cols-2">
+    <div class="reveal-stagger grid gap-8 md:grid-cols-2">
       <!-- Card 1 -->
       <div class="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 md:flex-row">
         <div class="min-h-[220px] w-full overflow-hidden md:w-2/5">
@@ -540,11 +623,13 @@ function tick() {
   const now = getNowET();
   const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 
-  // Clock display
+  // Clock display — AM/PM lives in its own smaller element so it never wraps
   const ampm = h >= 12 ? "PM" : "AM";
   const h12 = h % 12 || 12;
   const clockEl = document.getElementById("et-clock");
-  if (clockEl) clockEl.textContent = `${h12}:${pad(m)}:${pad(s)} ${ampm}`;
+  const ampmEl = document.getElementById("et-ampm");
+  if (clockEl) clockEl.textContent = `${h12}:${pad(m)}:${pad(s)}`;
+  if (ampmEl) ampmEl.textContent = ampm;
 
   // Date display
   const dateEl = document.getElementById("et-date");
@@ -560,19 +645,28 @@ function tick() {
   const rm = Math.floor((diffSec % 3600) / 60);
   const rs = diffSec % 60;
 
+  // On Fridays the Dhuhr slot is Jumu'ah
+  const isFriday = now.getDay() === 5;
+  const displayName = isFriday && nextPrayer.name === "Dhuhr" ? "Jumu'ah" : nextPrayer.name;
+
   const nameEl = document.getElementById("next-prayer-name");
   const countEl = document.getElementById("next-prayer-countdown");
-  if (nameEl) nameEl.textContent = nextPrayer.name;
+  if (nameEl) nameEl.textContent = displayName;
   if (countEl) countEl.textContent = `${pad(rh)}:${pad(rm)}:${pad(rs)}`;
 
-  // Highlight the next upcoming prayer's cell
+  // Highlight the next upcoming prayer's cell.
+  // Dhuhr and Jumu'ah share the same adhan time — highlight Jumu'ah only on
+  // Fridays, and Dhuhr only on the other days.
   const nextMinOfDay = nextPrayer.h * 60 + nextPrayer.m;
   document.querySelectorAll<HTMLElement>(".prayer-cell").forEach(cell => {
     const adhan = cell.getAttribute("data-adhan");
+    const name = cell.getAttribute("data-name");
     const bar = cell.querySelector(".prayer-highlight-bar");
     if (!adhan) return;
     const [ah, am] = adhan.split(":").map(Number);
-    const isNext = ah * 60 + am === nextMinOfDay;
+    let isNext = ah * 60 + am === nextMinOfDay;
+    if (name === "Jumu'ah") isNext = isNext && isFriday;
+    else if (name === "Dhuhr") isNext = isNext && !isFriday;
     cell.style.background = isNext ? "#f0fdf4" : "";
     if (bar) bar.classList.toggle("hidden", !isNext);
   });
@@ -619,6 +713,6 @@ if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     },
     { threshold: 0.12 },
   );
-  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  document.querySelectorAll(".reveal, .reveal-stagger").forEach((el) => io.observe(el));
 }
 </script>
